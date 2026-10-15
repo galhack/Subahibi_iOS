@@ -1,0 +1,34 @@
+# Game data: every player must supply their own purchased copy
+/data/
+*.arc
+*._bp
+BGI*.exe
+BGI.gdb
+BGI.hvl
+font.ttf
+UserData/
+
+# Private notes and credentials
+Claude.md
+CLAUDE.md
+*.env
+.env*
+*.pem
+*.p12
+*.mobileprovision
+.*.csv
+
+# Build products and local tooling
+/build/
+/.venv/
+engine/openbgi/obj/
+engine/openbgi/bin/
+engine/openbgi/inc/bgi/msg.h
+DerivedData/
+*.xcuserstate
+xcuserdata/
+app/*.xcodeproj/
+*.ipa
+*.dSYM/
+.DS_Store
+__pycache__/

@@ -99,6 +99,12 @@ void OS_AudioStop(void)
 	gRate = 0;
 }
 
+void AppleHost_AudioResume(void)
+{
+	if(gUnit)
+		AudioOutputUnitStart(gUnit);
+}
+
 int OS_AudioAvailable(void)
 {
 	return 1;

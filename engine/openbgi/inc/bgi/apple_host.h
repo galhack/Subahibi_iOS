@@ -68,6 +68,8 @@ void AppleHost_Key(int vk, int down);
 void AppleHost_SetTouchInput(int touch);
 // the application came to the front (1) or went to the background (0)
 void AppleHost_SetActive(int active);
+// restart the sound output after the audio session was interrupted (a call, another app)
+void AppleHost_AudioResume(void);
 
 // ---- picture --------------------------------------------------------------------------------
 typedef struct AppleHostFrame

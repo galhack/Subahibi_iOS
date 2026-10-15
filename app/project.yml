@@ -1,0 +1,79 @@
+# XcodeGen project of the Apple port: one application target for iPhone,
+# iPad, Apple TV and Vision Pro.  Generate with tools/apple/gen_project.sh
+# (or `xcodegen generate --spec app/project.yml`); the .xcodeproj itself is
+# not kept in git.
+name: Subahibi
+options:
+  bundleIdPrefix: org.local
+  createIntermediateGroups: true
+  deploymentTarget:
+    iOS: "17.0"
+    tvOS: "17.0"
+    visionOS: "1.0"
+settings:
+  base:
+    DEVELOPMENT_TEAM: ${SUBAHIBI_TEAM}
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    GCC_C_LANGUAGE_STANDARD: gnu99
+    CLANG_ENABLE_OBJC_ARC: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    DEAD_CODE_STRIPPING: YES
+targets:
+  Subahibi:
+    type: application
+    supportedDestinations: [iOS, tvOS, visionOS]
+    sources:
+      - path: Sources
+      - path: Resources
+        excludes:
+          - "Info.plist"
+      - path: ../engine/openbgi/src
+        group: Engine
+        compilerFlags: ["-w"]
+        excludes:
+          - "os/posix/audio.c"
+          - "os/posix/child.c"
+          - "os/posix/dbgwin.c"
+          - "os/posix/dialogs.c"
+          - "os/posix/edit.c"
+          - "os/posix/events.c"
+          - "os/posix/field.c"
+          - "os/posix/font.c"
+          - "os/posix/machine.c"
+          - "os/posix/msgbox.c"
+          - "os/posix/uikit.c"
+          - "os/posix/window.c"
+          - "os/posix/x11.c"
+          - "os/posix/*.h"
+          - "os/win32/**"
+          - "os/wasm/**"
+          - "sys/main.c"
+          - "os/apple/third_party/**"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.local.subahibi.${SUBAHIBI_TEAM}
+        PRODUCT_NAME: Subahibi
+        INFOPLIST_FILE: Resources/Info.plist
+        SWIFT_OBJC_BRIDGING_HEADER: Sources/Native/Bridging.h
+        HEADER_SEARCH_PATHS:
+          - $(SRCROOT)/../engine/openbgi/inc
+          - $(SRCROOT)/../engine/openbgi
+          - $(SRCROOT)/Sources/Native
+        GCC_PREPROCESSOR_DEFINITIONS:
+          - $(inherited)
+          - BGI_POSIX=1
+          - BGI_APPLE=1
+          - BGI_USE_STB_VORBIS=1
+          - _DARWIN_C_SOURCE=1
+        OTHER_LDFLAGS: ["-liconv"]
+        TARGETED_DEVICE_FAMILY[sdk=iphone*]: "1,2"
+        TARGETED_DEVICE_FAMILY[sdk=appletv*]: "3"
+        TARGETED_DEVICE_FAMILY[sdk=xr*]: "7"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_APPICON_NAME[sdk=appletv*]: "App Icon & Top Shelf Image"
+        CODE_SIGN_ENTITLEMENTS: ""
+        ENABLE_BITCODE: NO
+        GCC_OPTIMIZATION_LEVEL[config=Debug]: 2

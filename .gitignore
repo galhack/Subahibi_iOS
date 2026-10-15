@@ -23,7 +23,6 @@ CLAUDE.md
 /.venv/
 engine/openbgi/obj/
 engine/openbgi/bin/
-engine/openbgi/inc/bgi/msg.h
 DerivedData/
 *.xcuserstate
 xcuserdata/

@@ -28,6 +28,8 @@ enum DebugScript {
     static var debugDirectory: URL {
         #if os(tvOS)
         GamePaths.caches.appendingPathComponent("Debug", isDirectory: true)
+        #elseif targetEnvironment(macCatalyst)
+        GamePaths.applicationSupport.appendingPathComponent("Debug", isDirectory: true)
         #else
         GamePaths.documents.appendingPathComponent("Debug", isDirectory: true)
         #endif

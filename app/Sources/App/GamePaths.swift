@@ -18,9 +18,23 @@ enum GamePaths {
     }
 
     static var applicationSupport: URL {
-        let url = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        var url = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        #if targetEnvironment(macCatalyst)
+        // a Mac application is not in a container: keep to a folder of its own
+        url = url.appendingPathComponent("Subahibi", isDirectory: true)
+        #endif
         try? fileManager.createDirectory(at: url, withIntermediateDirectories: true)
         return url
+    }
+
+    /// The game folder the player picked (the Mac reads the game where it is
+    /// installed rather than a copy); nil when none was chosen.
+    static var chosenGameFolder: URL? {
+        get {
+            guard let path = UserDefaults.standard.string(forKey: "gameFolderPath") else { return nil }
+            return URL(fileURLWithPath: path, isDirectory: true)
+        }
+        set { UserDefaults.standard.set(newValue?.path, forKey: "gameFolderPath") }
     }
 
     static var caches: URL {
@@ -31,6 +45,8 @@ enum GamePaths {
     static var transferTarget: URL {
         #if os(tvOS)
         let url = caches.appendingPathComponent("Game", isDirectory: true)
+        #elseif targetEnvironment(macCatalyst)
+        let url = applicationSupport.appendingPathComponent("Game", isDirectory: true)
         #else
         let url = documents.appendingPathComponent("Game", isDirectory: true)
         #endif
@@ -64,9 +80,10 @@ enum GamePaths {
     /// The game folder: a folder holding sysprg.arc, searched in the places
     /// above and one level below them.
     static func findGameFolder() -> URL? {
+        if let chosen = chosenGameFolder, isGameFolder(chosen) { return chosen }
         var roots = [transferTarget]
-        #if !os(tvOS)
-        roots.append(documents)
+        #if !os(tvOS) && !targetEnvironment(macCatalyst)
+        roots.append(documents) // on a Mac, Documents is the user's own: not searched
         #endif
         for root in roots {
             if isGameFolder(root) { return root }

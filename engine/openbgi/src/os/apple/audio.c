@@ -18,6 +18,11 @@
 
 static AudioComponentInstance gUnit;
 static OsAudioFill_t gFill;
+/* Set once AudioOutputUnitStart has returned.  On a Mac the start waits for
+ * the first render cycle, while the engine calls OS_AudioStart with the
+ * sound library's lock held (Wm_Init): pulling the mixer before the start
+ * returns would wait for that lock and deadlock both threads. */
+static volatile int gPulling;
 static void* gUser;
 static int gRate;
 
@@ -29,7 +34,7 @@ static OSStatus Render(void* ref, AudioUnitRenderActionFlags* flags, const Audio
 	BGI_UNUSED(flags);
 	BGI_UNUSED(ts);
 	BGI_UNUSED(bus);
-	if(gFill)
+	if(gFill && gPulling)
 		gFill(gUser, out, (int)frames);
 	else
 		memset(out, 0, (size_t)frames * 4);
@@ -77,12 +82,14 @@ int OS_AudioStart(int rate, OsAudioFill_t fill, void* user)
 		AudioUnitSetProperty(gUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &cb, sizeof cb) != noErr ||
 		AudioUnitInitialize(gUnit) != noErr || AudioOutputUnitStart(gUnit) != noErr)
 	{
+		gPulling = 0;
 		AudioComponentInstanceDispose(gUnit);
 		gUnit = NULL;
 		gFill = NULL;
 		gRate = 0;
 		return 0;
 	}
+	gPulling = 1;
 	return 1;
 }
 
@@ -91,6 +98,7 @@ void OS_AudioStop(void)
 {
 	if(!gUnit)
 		return;
+	gPulling = 0;
 	AudioOutputUnitStop(gUnit);
 	AudioUnitUninitialize(gUnit);
 	AudioComponentInstanceDispose(gUnit);

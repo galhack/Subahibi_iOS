@@ -39,6 +39,19 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// The game folder the player picked (Mac): remembered for the next launches.
+    func choose(folder: URL) {
+        let accessing = folder.startAccessingSecurityScopedResource()
+        defer { if accessing { folder.stopAccessingSecurityScopedResource() } }
+        if GamePaths.isGameFolder(folder) {
+            GamePaths.chosenGameFolder = folder
+            errorMessage = nil
+        } else {
+            errorMessage = "这个文件夹里没有 sysprg.arc 和 system.arc，请选择游戏的安装目录。"
+        }
+        refresh()
+    }
+
     /// Coming back to the front: files may have been copied in meanwhile.
     func refreshIfIdle() {
         if phase == .launcher { refresh() }

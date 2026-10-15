@@ -31,3 +31,6 @@ app/*.xcodeproj/
 *.dSYM/
 .DS_Store
 __pycache__/
+
+# the local signing team of tools/apple/gen_project.sh
+app/.team

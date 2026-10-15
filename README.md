@@ -1,7 +1,7 @@
 # 美好的每一天 ～不连续存在～ · Apple 平台移植
 
 把 ケロQ《素晴らしき日々 ～不連続存在～》（BGI/Ethornell 引擎，HD 版，产品名 `SubarashikihibiHD`）
-原生移植到 **iPhone、iPad、Apple TV、Apple Vision Pro**。日文原版与【冥月·凌雪汉化组】中文补丁都可以游玩。
+原生移植到 **iPhone、iPad、Mac、Apple TV、Apple Vision Pro**。日文原版与【冥月·凌雪汉化组】中文补丁都可以游玩。
 
 > **本仓库不包含任何游戏内容。** 游戏的程序、剧本、图片、音乐、影片与汉化补丁都不在这里，
 > 也不会被打包进应用。你需要自行购买正版游戏，把自己的游戏目录导入到设备上。
@@ -20,7 +20,7 @@
   AudioToolbox 输出声音；pl_mpeg 解码 MPEG-1 影片；存档与游戏数据分离保存。
 - 中文补丁：应用会在首次选择中文时自动解开 `BGI-CHS.exe` 内的 Enigma Virtual Box 虚拟文件
   （汉化剧本与图片），不需要在电脑上做任何预处理。
-- 应用外壳：SwiftUI + UIKit，一个工程同时构建 iOS/iPadOS、tvOS、visionOS 原生版本。
+- 应用外壳：SwiftUI + UIKit，一个工程同时构建 iOS/iPadOS、Mac（Mac Catalyst）、tvOS、visionOS 原生版本。
 
 已在以下真机验证（2026-10）：iPhone 16 Pro Max、iPad Pro、Apple TV 4K、Apple Vision Pro（原生 visionOS 应用），
 日文与中文均可进入剧情；存档、读档跨重启可用；影片可从封包直接播放。
@@ -50,9 +50,22 @@ open app/Subahibi.xcodeproj
 ```
 
 Team ID 可在 Xcode › Settings › Accounts 中查看（免费账户的个人团队也有 Team ID）。
+也可以把它写进 `app/.team`（单行，不会提交到 git），之后直接运行 `tools/apple/gen_project.sh`。
 脚本会自动下载 XcodeGen（仅在本机 `build/` 目录中）。工程无需额外安装 Metal 工具链或任何第三方库。
 
-### 2. 安装到设备
+### 2. Mac 版
+
+```sh
+tools/apple/build_mac.sh          # 生成 build/Subahibi-mac.zip（本机签名，不含游戏数据）
+```
+
+解压后把 `Subahibi.app` 拖到「应用程序」。首次打开如被系统拦截，请右键 › 打开（该应用未经公证）。
+也可以在 Xcode 中选择 "My Mac (Mac Catalyst)" 直接运行。Mac 版无需 Apple ID。
+
+启动后点「选择游戏目录…」，指向电脑上的游戏安装目录即可，**不需要复制数据**；选择会被记住。
+存档、汉化解包保存在 `~/Library/Application Support/Subahibi/`。
+
+### 3. 安装到 iPhone / iPad / Apple TV / Vision Pro
 
 **用 Xcode（四种设备都适用，Apple TV / Vision Pro 推荐此方式）**
 
@@ -125,8 +138,8 @@ xcrun devicectl device copy to --device <设备> \
 | 双指轻点 | 鼠标右键（游戏菜单 / 隐藏文字框） |
 | 上下滑动 | 鼠标滚轮（向下滑 = 打开回想） |
 | 长按 | 按住 Ctrl（快进），松手停止 |
-| iPad 触控板 / 鼠标 | 与电脑相同：移动、左右键、滚轮 |
-| 硬件键盘 | Enter、空格、Esc、方向键、Ctrl、Page Up/Down 等 |
+| Mac / iPad 鼠标与触控板 | 与 PC 版相同：按下、拖动（如回想滚动条）、左右键、滚轮 |
+| 硬件键盘 | Enter、空格、Esc、方向键、Ctrl（按住快进）、Page Up/Down 等 |
 | Apple TV 遥控器 | 触控板移动指针，按下 = 左键，返回键 = 右键，上/下键 = 滚轮，播放/暂停 = 按住快进 |
 | 游戏手柄 | 左摇杆移动指针，A = 左键，B = 右键，RT = 快进，十字键上/下 = 滚轮 |
 | Vision Pro | 注视 + 捏合 = 轻点；其余同触控 |
@@ -137,7 +150,7 @@ xcrun devicectl device copy to --device <设备> \
 
 ## 存档
 
-- 存档与游戏数据分开保存（iPhone/iPad/Vision Pro 在 Application Support，Apple TV 在缓存区），**日文版与中文版各自独立**
+- 存档与游戏数据分开保存（iPhone/iPad/Vision Pro 在 Application Support，Mac 在 `~/Library/Application Support/Subahibi`，Apple TV 在缓存区），**日文版与中文版各自独立**
   （汉化版存档含 GBK 文本，原版作品同样不能混用）。
 - 首次启动时会把游戏目录中的 `BGI.gdb`（全局设定、已读记录、CG 收集）复制一份作为起点，
   电脑上的进度因此可以带过来。

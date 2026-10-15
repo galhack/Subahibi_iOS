@@ -86,17 +86,22 @@ final class GameViewController: UIViewController {
 
         let swipe = UIPanGestureRecognizer(target: self, action: #selector(swipe(_:)))
         swipe.maximumNumberOfTouches = 1
-        swipe.allowedScrollTypesMask = .all // a mouse wheel or a trackpad scroll arrives here too
         view.addGestureRecognizer(swipe)
         tap.require(toFail: swipe)
 
         #if os(iOS)
-        // the secondary click of a mouse or trackpad only: without the touch-type
-        // restriction this recognizer also takes plain finger taps (as a right click)
-        let secondary = UITapGestureRecognizer(target: self, action: #selector(rightTap(_:)))
-        secondary.buttonMaskRequired = .secondary
-        secondary.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.indirectPointer.rawValue)]
-        view.addGestureRecognizer(secondary)
+        // A mouse or a trackpad (iPad, Mac) is handled as a real mouse in the touches
+        // methods below - press, drag, release, either button - so the gestures take
+        // fingers and the pencil only.
+        let fingers = [UITouch.TouchType.direct, .pencil].map { NSNumber(value: $0.rawValue) }
+        for r in [tap, twoFinger, hold, swipe] as [UIGestureRecognizer] {
+            r.allowedTouchTypes = fingers
+        }
+        // the wheel and two-finger trackpad scrolling: scroll events only, no touches
+        let scroll = UIPanGestureRecognizer(target: self, action: #selector(swipe(_:)))
+        scroll.allowedScrollTypesMask = .all
+        scroll.allowedTouchTypes = []
+        view.addGestureRecognizer(scroll)
 
         let hover = UIHoverGestureRecognizer(target: self, action: #selector(hover(_:)))
         view.addGestureRecognizer(hover)
@@ -156,6 +161,45 @@ final class GameViewController: UIViewController {
         lastHover = Date()
         AppleHost_SetTouchInput(0)
         AppleHost_PointerMove(Int32(p.x), Int32(p.y))
+    }
+    #endif
+
+    #if os(iOS)
+    // MARK: - mouse and trackpad: real presses
+
+    private var pointerButton: Int32?
+
+    private func pointerTouch(_ touches: Set<UITouch>) -> UITouch? {
+        touches.first { $0.type == .indirectPointer }
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let t = pointerTouch(touches), pointerButton == nil else { return super.touchesBegan(touches, with: event) }
+        let button: Int32 = event?.buttonMask.contains(.secondary) == true ? 1 : 0
+        let p = renderer.gamePoint(from: t.location(in: view))
+        lastHover = Date()
+        renderer.cursor = nil
+        AppleHost_SetTouchInput(0)
+        AppleHost_PointerMove(Int32(p.x), Int32(p.y))
+        AppleHost_PointerButton(button, 1, Int32(p.x), Int32(p.y))
+        pointerButton = button
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let t = pointerTouch(touches), pointerButton != nil else { return super.touchesMoved(touches, with: event) }
+        let p = renderer.gamePoint(from: t.location(in: view))
+        AppleHost_PointerMove(Int32(p.x), Int32(p.y))
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let t = pointerTouch(touches), let button = pointerButton else { return super.touchesEnded(touches, with: event) }
+        let p = renderer.gamePoint(from: t.location(in: view))
+        AppleHost_PointerButton(button, 0, Int32(p.x), Int32(p.y))
+        pointerButton = nil
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touchesEnded(touches, with: event)
     }
     #endif
 

@@ -5,6 +5,7 @@ import SwiftUI
 struct LauncherView: View {
     @EnvironmentObject private var model: AppModel
     @ObservedObject private var transfer: TransferServerObserver = .shared
+    @State private var choosingFolder = false
 
     var body: some View {
         ScrollView {
@@ -15,7 +16,11 @@ struct LauncherView: View {
                     languageSection
                     startButton
                 }
+                #if targetEnvironment(macCatalyst)
+                macFolderSection
+                #else
                 importSection
+                #endif
                 if let error = model.errorMessage {
                     Text(error).foregroundStyle(.red)
                 }
@@ -117,9 +122,32 @@ struct LauncherView: View {
         }
     }
 
+    #if targetEnvironment(macCatalyst)
+    /// The Mac plays the game where it is installed: the player points at the folder.
+    private var macFolderSection: some View {
+        Card {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("选择你电脑上的游戏目录（含 sysprg.arc 的文件夹），无需复制。")
+                Button("选择游戏目录…") { choosingFolder = true }
+                    .fileImporter(isPresented: $choosingFolder, allowedContentTypes: [.folder]) { result in
+                        if case .success(let url) = result { model.choose(folder: url) }
+                    }
+                Button("重新检查") { model.refresh() }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } label: {
+            Text("游戏目录")
+        }
+    }
+    #endif
+
     private var footer: some View {
         VStack(alignment: .leading, spacing: 4) {
+            #if targetEnvironment(macCatalyst)
+            Text("操作：鼠标与键盘同 PC 版 · 右键 = 菜单 · 滚轮 = 回想 · 按住 Control = 快进 · ⌃⌘F = 全屏")
+            #else
             Text("操作：轻点 = 左键 · 双指轻点 = 右键（菜单）· 上下滑动 = 滚轮（回想）· 长按 = 快进")
+            #endif
             Text("本应用不包含任何游戏内容，游戏数据需由玩家自行购买。")
         }
         .font(.footnote)

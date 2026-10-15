@@ -32,6 +32,10 @@ final class AppModel: ObservableObject {
             Task { @MainActor in self?.refresh() }
         }
         refresh()
+        if let lang = DebugScript.autostart {
+            language = lang
+            DispatchQueue.main.async { self.start() }
+        }
     }
 
     /// Coming back to the front: files may have been copied in meanwhile.
@@ -89,6 +93,7 @@ final class AppModel: ObservableObject {
         transfer.stop()
         if EngineBridge.start(gameFolder: folder, language: language, overlay: overlay) {
             phase = .playing
+            DebugScript.runIfRequested()
         } else {
             errorMessage = "游戏引擎无法启动：请确认游戏文件完整。"
             phase = .launcher

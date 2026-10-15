@@ -115,6 +115,8 @@ final class GameViewController: UIViewController {
 
     @objc private func tap(_ r: UITapGestureRecognizer) {
         guard r.state == .ended else { return }
+        renderer.cursor = nil
+        virtualCursor = gamePoint(r)
         noteTouchOrPointer()
         click(button: 0, at: gamePoint(r))
     }
@@ -202,10 +204,10 @@ final class GameViewController: UIViewController {
 
     private func attach(_ controller: GCController) {
         guard let pad = controller.extendedGamepad else { return }
-        renderer.cursor = virtualCursor
         pad.leftThumbstick.valueChangedHandler = { [weak self] _, x, y in
             let dead: Float = 0.15
             self?.stickVelocity = CGVector(dx: CGFloat(abs(x) > dead ? x : 0), dy: CGFloat(abs(y) > dead ? y : 0))
+            if self?.stickVelocity != .zero { self?.showCursor() }
         }
         pad.buttonA.pressedChangedHandler = { [weak self] _, _, pressed in self?.cursorButton(0, pressed) }
         pad.buttonB.pressedChangedHandler = { [weak self] _, _, pressed in self?.cursorButton(1, pressed) }
@@ -214,7 +216,13 @@ final class GameViewController: UIViewController {
         pad.dpad.down.pressedChangedHandler = { _, _, pressed in if pressed { AppleHost_Wheel(-120) } }
     }
 
+    /// The pointer appears once a controller or the remote is used, and goes away with a touch.
+    private func showCursor() {
+        if renderer.cursor == nil { renderer.cursor = virtualCursor }
+    }
+
     private func cursorButton(_ button: Int32, _ down: Bool) {
+        showCursor()
         AppleHost_SetTouchInput(0)
         AppleHost_PointerButton(button, down ? 1 : 0, Int32(virtualCursor.x), Int32(virtualCursor.y))
     }

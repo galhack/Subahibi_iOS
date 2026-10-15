@@ -96,8 +96,9 @@ struct LauncherView: View {
                     get: { transfer.running },
                     set: { $0 ? model.transfer.start() : model.transfer.stop() }))
                 if transfer.running {
+                    Text("配对码：\(transfer.code)").font(.title3.monospacedDigit().bold())
                     ForEach(TransferServer.addresses(), id: \.self) { ip in
-                        Text("python3 tools/push_data.py --host \(ip) <游戏目录>")
+                        Text("python3 tools/push_data.py --host \(ip) --code \(transfer.code) <游戏目录>")
                             .font(.system(.footnote, design: .monospaced))
                     }
                     if transfer.bytesReceived > 0 {
@@ -150,6 +151,7 @@ final class TransferServerObserver: ObservableObject {
     @Published var running = false
     @Published var lastEvent = ""
     @Published var bytesReceived: Int64 = 0
+    @Published var code = ""
     private var bound = false
 
     func bind(_ server: TransferServer) {
@@ -158,5 +160,6 @@ final class TransferServerObserver: ObservableObject {
         server.$running.receive(on: DispatchQueue.main).assign(to: &$running)
         server.$lastEvent.receive(on: DispatchQueue.main).assign(to: &$lastEvent)
         server.$bytesReceived.receive(on: DispatchQueue.main).assign(to: &$bytesReceived)
+        server.$code.receive(on: DispatchQueue.main).assign(to: &$code)
     }
 }

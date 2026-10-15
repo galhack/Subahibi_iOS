@@ -7,8 +7,12 @@ import Network
 ///   GET /status            the files already received, as JSON
 ///   PUT /files/<name>      a file of the game folder; the body is the file
 ///
-/// Names are plain file names (the game folder is flat); anything with a
-/// separator or "..", or a dot file, is refused.  A file is written next to
+/// Every request must carry the pairing code shown on the device
+/// (X-Subahibi-Code), a new random one each time the server is switched on,
+/// so nobody else on the network can write into the app.  Names are plain
+/// file names of the kinds a game folder holds (.arc archives, the patch
+/// executable, the font, ...): anything with a separator, a dot file or
+/// another extension is refused.  A file is written next to
 /// its final place and renamed when complete, so an interrupted transfer
 /// never leaves a truncated archive behind.
 final class TransferServer: ObservableObject {
@@ -17,6 +21,8 @@ final class TransferServer: ObservableObject {
     @Published private(set) var running = false
     @Published private(set) var lastEvent = ""
     @Published private(set) var bytesReceived: Int64 = 0
+    /// The pairing code of this session, shown by the launcher.
+    @Published private(set) var code = ""
 
     var onFileReceived: (() -> Void)?
 
@@ -25,6 +31,7 @@ final class TransferServer: ObservableObject {
 
     func start() {
         guard listener == nil else { return }
+        code = String(format: "%06d", Int.random(in: 0..<1_000_000))
         do {
             let params = NWParameters.tcp
             params.allowLocalEndpointReuse = true
@@ -105,12 +112,18 @@ final class TransferServer: ObservableObject {
         guard parts.count >= 2 else { return respond(conn, 400, "bad request") }
         let method = String(parts[0]), path = String(parts[1])
         var length: Int64 = 0
+        var given = ""
         for line in lines.dropFirst() {
             let kv = line.split(separator: ":", maxSplits: 1)
-            if kv.count == 2, kv[0].trimmingCharacters(in: .whitespaces).lowercased() == "content-length" {
-                length = Int64(kv[1].trimmingCharacters(in: .whitespaces)) ?? 0
-            }
+            guard kv.count == 2 else { continue }
+            let key = kv[0].trimmingCharacters(in: .whitespaces).lowercased()
+            let value = kv[1].trimmingCharacters(in: .whitespaces)
+            if key == "content-length" { length = Int64(value) ?? 0 }
+            if key == "x-subahibi-code" { given = value }
         }
+        let expected = DispatchQueue.main.sync { self.code }
+        guard !expected.isEmpty, given == expected else { return respond(conn, 403, "wrong pairing code") }
+        guard length >= 0 && length < (4 << 30) else { return respond(conn, 400, "bad length") }
         if method == "GET" && path == "/status" {
             return respond(conn, 200, statusJSON(), type: "application/json")
         }
@@ -124,9 +137,14 @@ final class TransferServer: ObservableObject {
         respond(conn, 404, "not found")
     }
 
+    /// The kinds of files a game folder holds.
+    static let allowedExtensions: Set<String> = ["arc", "exe", "ttf", "gdb", "hvl", "txt", "lst"]
+
     static func isSafe(_ name: String) -> Bool {
-        !name.isEmpty && !name.contains("/") && !name.contains("\\") && !name.hasPrefix(".") && name != ".."
-            && name.count < 200
+        guard !name.isEmpty, name.count < 200, !name.hasPrefix("."),
+              name.unicodeScalars.allSatisfy({ $0.value >= 0x20 && $0 != "/" && $0 != "\\" && $0 != ":" }) else { return false }
+        let ext = (name as NSString).pathExtension.lowercased()
+        return allowedExtensions.contains(ext)
     }
 
     private func receiveFile(_ conn: NWConnection, name: String, length: Int64, initialBody: Data) {
@@ -192,7 +210,8 @@ final class TransferServer: ObservableObject {
     }
 
     private func respond(_ conn: NWConnection, _ code: Int, _ body: String, type: String = "text/plain") {
-        let reason = [200: "OK", 400: "Bad Request", 404: "Not Found", 500: "Internal Server Error"][code] ?? "Error"
+        let reason = [200: "OK", 400: "Bad Request", 403: "Forbidden", 404: "Not Found",
+                      500: "Internal Server Error"][code] ?? "Error"
         let bytes = Data(body.utf8)
         var head = "HTTP/1.1 \(code) \(reason)\r\nContent-Type: \(type); charset=utf-8\r\n"
         head += "Content-Length: \(bytes.count)\r\nConnection: close\r\n\r\n"

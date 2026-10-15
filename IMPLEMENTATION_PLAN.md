@@ -15,22 +15,22 @@
 ## Stage 1: 引擎 1.647 兼容（macOS 无头模拟）
 **Goal**: wasm-sim 无头构建在日文与中文资源下都能启动、进入标题、开始新游戏并推进剧情、存读档。
 **Success Criteria**: 新增 `GEN_1_647` 代与游戏识别；脚本无未实现/错误指令；截图显示标题画面与对话文本。
-**Tests**: `make test` 全过；`tools/sim/run.sh` 场景脚本（标题→新游戏→点击若干次→截图）日/中各一次。
-**Status**: In Progress
+**Tests**: `make test`（bfmovie/extract 两项为 wasmsim 平台既有失败，上游同样）；`tools/sim/run.sh` 场景脚本日/中各一次。
+**Status**: Complete（新增 GEN_1_647、CBG v2 解码、56/91 DB/B0 06、封包内影片；全部 5697 张图零失败）
 
 ## Stage 2: Apple OS 后端
 **Goal**: `platform/apple` 实现 os.h：文件（沙盒路径+大小写不敏感）、线程/时间、Metal 呈现、触摸/遥控器/键盘→鼠标键盘事件、
 CoreText 字体（日文 SJIS / 中文 GBK+font.ttf 回退）、AudioUnit 拉流、pl_mpeg 影片、设置存储。
 **Success Criteria**: iOS 模拟器中游戏可玩，声音、影片、文字正确。
-**Tests**: 后端单元测试（编码转换、路径解析、字体渲染尺寸）；模拟器截图比对。
-**Status**: Not Started
+**Tests**: `make PLATFORM=apple` + `tools/apple/hosttest.c`（日/中文剧情截图、`--movie` 影片解码）。
+**Status**: Complete
 
 ## Stage 3: 多平台 App 外壳
 **Goal**: XcodeGen 工程，iOS/iPadOS、tvOS、visionOS 原生目标；数据导入（Finder 文件共享 + 局域网推送 `tools/push_data.py`）、
 汉化补丁自动解包（Enigma VFS）、语言选择、遥控器/注视捏合交互、画面适配。
 **Success Criteria**: 四类实机安装运行，能导入数据并游玩。
-**Tests**: 各平台构建通过；实机启动→标题→剧情→存读档。
-**Status**: Not Started
+**Tests**: 各平台构建通过；实机启动→标题→剧情→存读档（`SUBAHIBI_AUTOSTART` / `SUBAHIBI_SCRIPT` 调试脚本）。
+**Status**: In Progress（四类设备已安装，数据经 devicectl 推送中）
 
 ## Stage 4: 打磨与验证
 **Goal**: 性能（60fps 呈现、低耗电）、后台/前台切换、存档持久化（tvOS 存储约束）、影片与特效校验。

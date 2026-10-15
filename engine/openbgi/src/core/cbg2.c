@@ -478,16 +478,20 @@ uint32_t BGI_CbgDecodeV2(const void* src, uint32_t srcLen, void* dst)
 {
 	const CbgHeader_t* h = (const CbgHeader_t*)src;
 	const uint8_t* s = (const uint8_t*)src;
-	const uint8_t *end = srcLen == 0xffffffffu ? NULL : s + srcLen, *base, *p, *data;
+	/* every read is bounded by the file size; a caller that does not know it
+	 * (0xFFFFFFFF) gets the original's trust in the offsets, up to 2 GB */
+	size_t size = srcLen == 0xffffffffu ? 0x7fffffffu : srcLen;
+	const uint8_t *end = s + size, *base, *p, *data;
 	uint32_t w1[0x10], w2[0xB0];
 	uint32_t bpp = h->bpp & 0xffff, ok = 0;
-	int32_t* offs;
+	int32_t* offs = NULL;
 	int16_t* coef;
+	size_t avail; // the bytes from `data` to the end of the file
 	Cbg2_t* d;
 	int i, rows, x, y;
 	uint8_t* out = (uint8_t*)dst + 0x10;
 
-	if(h->encLen < 0x80 || (bpp != 8 && bpp != 24 && bpp != 32))
+	if(size < 0x30 || h->encLen < 0x80 || h->encLen > size - 0x30 || (bpp != 8 && bpp != 24 && bpp != 32))
 		return 0x80000004u;
 	d = (Cbg2_t*)BGI_Alloc(sizeof *d);
 	memset(d, 0, sizeof *d);
@@ -499,44 +503,60 @@ uint32_t BGI_CbgDecodeV2(const void* src, uint32_t srcLen, void* dst)
 	memcpy(dst, s + 0x10, 0x10);
 
 	base = p = s + 0x30 + h->encLen;
-	if(!end) // the caller does not know the size: trust the offsets like the original
-		end = base + 0x7fffffff;
 	for(i = 0; i < 0x10; i++)
-		w1[i] = (uint32_t)ReadVarint(&p, end);
+	{
+		int v = ReadVarint(&p, end);
+		if(v < 0)
+			goto done;
+		w1[i] = (uint32_t)v;
+	}
 	for(i = 0; i < 0xB0; i++)
-		w2[i] = (uint32_t)ReadVarint(&p, end);
+	{
+		int v = ReadVarint(&p, end);
+		if(v < 0)
+			goto done;
+		w2[i] = (uint32_t)v;
+	}
 	d->w = (h->width + 7) & ~7;
 	d->h = (h->height + 7) & ~7;
 	d->channels = bpp == 8 ? 1 : 3;
 	rows = d->h / 8;
-	if(!HTree_Build(&d->dcTree, w1, 0x10) || !HTree_Build(&d->acTree, w2, 0xB0))
+	if(rows == 0 || !HTree_Build(&d->dcTree, w1, 0x10) || !HTree_Build(&d->acTree, w2, 0xB0))
 		goto done;
 
 	// the row offsets count from `base`; the rows themselves follow the table
+	if((size_t)(end - p) < (size_t)(rows + 1) * 4)
+		goto done;
 	offs = (int32_t*)BGI_Alloc((size_t)(rows + 1) * sizeof *offs);
 	for(i = 0; i <= rows; i++)
 		offs[i] = (int32_t)(p[i * 4] | p[i * 4 + 1] << 8 | p[i * 4 + 2] << 16 | (uint32_t)p[i * 4 + 3] << 24);
 	data = p + (rows + 1) * 4;
+	avail = (size_t)(end - data);
 	for(i = 0; i <= rows; i++)
-		offs[i] -= (int32_t)(data - base);
+	{
+		// relative to `data`; anything outside the file becomes -1 (skipped)
+		int64_t o = (int64_t)offs[i] - (int64_t)(data - base);
+		offs[i] = o < 0 || (uint64_t)o > avail ? -1 : (int32_t)o;
+	}
 
 	d->bgra = (uint8_t*)BGI_Alloc((size_t)d->w * d->h * 4);
 	memset(d->bgra, bpp == 32 ? 0xff : 0, (size_t)d->w * d->h * 4);
 	coef = (int16_t*)BGI_Alloc((size_t)d->w * 8 * d->channels * sizeof *coef);
 	{
-		int padSkip = ((d->w >> 3) + 7) >> 3; // a bit field of the blocks, unused by the decoder
+		size_t padSkip = (size_t)(((d->w >> 3) + 7) >> 3); // a bit field of the blocks, unused by the decoder
 		for(y = 0; y < rows; y++)
 		{
-			const uint8_t* rowEnd = y + 1 < rows ? data + offs[y + 1] : (bpp == 32 ? data + offs[rows] : end);
-			if(offs[y] < 0 || data + offs[y] + padSkip > rowEnd)
+			// a row ends where the next one (or the alpha plane) starts, the last one at the end of the file
+			int32_t next = y + 1 < rows ? offs[y + 1] : (bpp == 32 ? offs[rows] : -1);
+			size_t rowEnd = next >= offs[y] && next >= 0 ? (size_t)next : avail;
+			if(offs[y] < 0 || (size_t)offs[y] + padSkip > rowEnd)
 				continue;
-			Cbg2_Row(d, data + offs[y] + padSkip, rowEnd, y, coef);
+			Cbg2_Row(d, data + offs[y] + padSkip, data + rowEnd, y, coef);
 		}
 	}
 	if(bpp == 32 && offs[rows] >= 0)
 		Cbg2_Alpha(d, data + offs[rows], end);
 	BGI_Free(coef);
-	BGI_Free(offs);
 
 	// crop the padded picture into the tightly packed rows of the raw image
 	for(y = 0; y < h->height; y++)
@@ -563,6 +583,8 @@ uint32_t BGI_CbgDecodeV2(const void* src, uint32_t srcLen, void* dst)
 	BGI_Free(d->bgra);
 	ok = 1;
 done:
+	if(offs)
+		BGI_Free(offs);
 	BGI_Free(d);
 	return ok ? 0 : 0x80000004u;
 }

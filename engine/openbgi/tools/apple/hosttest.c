@@ -12,7 +12,7 @@
  *   openbgi-hosttest GAME_DIR [options]
  *     --seconds=N        end after N seconds (default 30)
  *     --script="..."     wait S | move X Y | click X Y | rclick X Y |
- *                        key VK | wheel D | shot FILE  (as the wasm simulator)
+ *                        key VK | keydown VK | keyup VK | wheel D | shot FILE
  *     --shot=FILE        the last picture, written when the time is up
  *     --overlay=DIR      loose files shadowing the game (a translation patch)
  *     --font=FILE        a font file to register (the patch's font.ttf)
@@ -282,6 +282,8 @@ int main(int argc, char** argv)
 					AppleHost_Key(x, 0);
 					script += n;
 				}
+				else if((!strcmp(word, "keydown") || !strcmp(word, "keyup")) && sscanf(script, "%i%n", &x, &n) == 1)
+					AppleHost_Key(x, word[3] == 'd'), script += n;
 				else if(!strcmp(word, "wheel") && sscanf(script, "%d%n", &x, &n) == 1)
 					AppleHost_Wheel(x), script += n;
 				else if(!strcmp(word, "shot") && sscanf(script, "%511s%n", arg, &n) == 1)

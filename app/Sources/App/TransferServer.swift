@@ -33,32 +33,47 @@ final class TransferServer: ObservableObject {
     private var activeCode = ""
     private var failures: [Date] = []
     private var lockedUntil = Date.distantPast
-    private static let maxFailuresPerMinute = 5
+    private var lockouts = 0
+    private static let maxFailures = 5
 
-    /// At most five wrong codes a minute; then every request is refused for a
-    /// minute, so a 6-digit code cannot be guessed and the lock lifts by itself.
+    /// Five wrong codes lock the receiver (1 minute, doubling with every
+    /// further lockout) and replace the code with a new random one, so what a
+    /// guesser learned is worthless and at most five guesses ever meet the
+    /// same code; the player reads the new code on the screen.
     private func checkCode(_ given: String) -> Bool {
         lock.lock()
         defer { lock.unlock() }
         let now = Date()
         if now < lockedUntil || activeCode.isEmpty { return false }
         if given == activeCode { return true }
-        failures = failures.filter { now.timeIntervalSince($0) < 60 } + [now]
-        if failures.count >= Self.maxFailuresPerMinute {
-            lockedUntil = now.addingTimeInterval(60)
+        failures.append(now)
+        if failures.count >= Self.maxFailures {
+            let minutes = 1 << min(lockouts, 6)
+            lockouts += 1
+            lockedUntil = now.addingTimeInterval(Double(minutes) * 60)
             failures.removeAll()
-            DispatchQueue.main.async { self.lastEvent = "配对码错误次数过多，暂停接收 1 分钟。" }
+            let fresh = Self.newCode()
+            activeCode = fresh
+            DispatchQueue.main.async {
+                self.code = fresh
+                self.lastEvent = "配对码错误次数过多：已更换配对码，暂停接收 \(minutes) 分钟。"
+            }
         }
         return false
     }
 
+    private static func newCode() -> String {
+        String(format: "%06d", Int.random(in: 0..<1_000_000))
+    }
+
     func start() {
         guard listener == nil else { return }
-        code = String(format: "%06d", Int.random(in: 0..<1_000_000))
+        code = Self.newCode()
         lock.lock()
         activeCode = code
         failures.removeAll()
         lockedUntil = .distantPast
+        lockouts = 0
         lock.unlock()
         do {
             let params = NWParameters.tcp

@@ -17,6 +17,7 @@
 #include "bgi/error.h"
 #include "bgi/strutil.h"
 #include "bgi/msg.h"
+#include <stdio.h>
 #include "bgi/os.h"
 
 char gBaseDir[0x104];
@@ -65,6 +66,7 @@ void SetBootName(const char* arc, const char* file)
 
 void GetBootProgram(char* arc, char* file)
 {
+	fprintf(stderr, "bgi: boot program %.32s : %.32s (base %.32s)\n", gBootArc, gBootFile, gBaseDir);
 	strcpy(arc, gBootArc);
 	strcpy(file, gBootFile);
 }

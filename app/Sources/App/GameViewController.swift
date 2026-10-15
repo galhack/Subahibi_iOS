@@ -91,8 +91,11 @@ final class GameViewController: UIViewController {
         tap.require(toFail: swipe)
 
         #if os(iOS)
+        // the secondary click of a mouse or trackpad only: without the touch-type
+        // restriction this recognizer also takes plain finger taps (as a right click)
         let secondary = UITapGestureRecognizer(target: self, action: #selector(rightTap(_:)))
         secondary.buttonMaskRequired = .secondary
+        secondary.allowedTouchTypes = [NSNumber(value: UITouch.TouchType.indirectPointer.rawValue)]
         view.addGestureRecognizer(secondary)
 
         let hover = UIHoverGestureRecognizer(target: self, action: #selector(hover(_:)))
@@ -158,6 +161,7 @@ final class GameViewController: UIViewController {
 
     private func click(button: Int32, at p: CGPoint) {
         let x = Int32(p.x), y = Int32(p.y)
+        fputs("input: click \(button) at \(x),\(y) (view \(view.bounds.size), picture \(renderer.contentRect))\n", stderr)
         AppleHost_PointerMove(x, y)
         AppleHost_PointerButton(button, 1, x, y)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {

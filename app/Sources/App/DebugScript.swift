@@ -14,6 +14,25 @@ import UniformTypeIdentifiers
 /// "shot NAME" writes the picture to Documents/Debug/NAME.png (Caches on tvOS).
 /// Nothing here runs in a normal launch.
 enum DebugScript {
+    /// In a debug launch the engine's messages (stderr) go to Debug/stderr.txt next to the shots.
+    static func redirectLogIfRequested() {
+        let env = ProcessInfo.processInfo.environment
+        guard env["SUBAHIBI_AUTOSTART"] != nil || env["SUBAHIBI_SCRIPT"] != nil else { return }
+        let dir = debugDirectory
+        try? FileManager.default.removeItem(at: dir) // no shots of an earlier run left to mislead
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        freopen(dir.appendingPathComponent("stderr.txt").path, "w", stderr)
+        setvbuf(stderr, nil, _IONBF, 0)
+    }
+
+    static var debugDirectory: URL {
+        #if os(tvOS)
+        GamePaths.caches.appendingPathComponent("Debug", isDirectory: true)
+        #else
+        GamePaths.documents.appendingPathComponent("Debug", isDirectory: true)
+        #endif
+    }
+
     static var autostart: GameLanguage? {
         ProcessInfo.processInfo.environment["SUBAHIBI_AUTOSTART"].flatMap(GameLanguage.init(rawValue:))
     }
@@ -67,11 +86,7 @@ enum DebugScript {
         copy.withUnsafeMutableBytes { $0.copyMemory(from: UnsafeRawBufferPointer(start: pixels, count: w * h * 4)) }
         AppleHost_UnlockFrame()
         for i in copy.indices { copy[i] |= 0xff00_0000 }
-        #if os(tvOS)
-        let dir = GamePaths.caches.appendingPathComponent("Debug", isDirectory: true)
-        #else
-        let dir = GamePaths.documents.appendingPathComponent("Debug", isDirectory: true)
-        #endif
+        let dir = debugDirectory
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent("\(name).png")
         copy.withUnsafeMutableBytes { raw in

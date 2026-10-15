@@ -224,7 +224,12 @@ int AppleHost_Start(const AppleHostConfig_t* cfg)
 	gRunning = 1;
 	pthread_attr_init(&attr);
 	// the engine keeps large buffers on its stack (paths, text lines): 16 MB, as the main thread of a desktop process
-	pthread_attr_setstacksize(&attr, 16u << 20);
+	{
+		int rc = pthread_attr_setstacksize(&attr, 16u << 20);
+		size_t got = 0;
+		pthread_attr_getstacksize(&attr, &got);
+		fprintf(stderr, "bgi: engine thread stack %zu bytes (setstacksize %d)\n", got, rc);
+	}
 	if(pthread_create(&gThread, &attr, EngineThread, NULL) != 0)
 	{
 		pthread_attr_destroy(&attr);

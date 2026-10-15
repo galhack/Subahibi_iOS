@@ -6,10 +6,10 @@ import Foundation
 ///   Documents (Finder file sharing, the Files app, AirDrop) or sent over
 ///   the local network; saves and the unpacked Chinese patch live in
 ///   Application Support, out of the user's way.
-/// * Apple TV has no user-visible documents: everything arrives over the
-///   network into Caches (which tvOS may purge when the disk runs low; the
-///   launcher then asks for the files again).  Saves go to Application
-///   Support all the same.
+/// * Apple TV has no user-visible documents and lets an app write only to
+///   Caches and tmp: the game files, the unpacked patch and the saves all
+///   live in Caches, which tvOS may purge when its disk runs low (the
+///   launcher then asks for the files again).
 enum GamePaths {
     static let fileManager = FileManager.default
 
@@ -41,7 +41,13 @@ enum GamePaths {
     /// Saves and the global database, one folder per language: the Chinese
     /// patch's saves hold GBK text and cannot be shared with the original's.
     static func saves(for language: GameLanguage) -> URL {
-        let url = applicationSupport.appendingPathComponent("Saves/\(language.rawValue)", isDirectory: true)
+        #if os(tvOS)
+        // tvOS lets an app write only to Caches and tmp
+        let base = caches
+        #else
+        let base = applicationSupport
+        #endif
+        let url = base.appendingPathComponent("Saves/\(language.rawValue)", isDirectory: true)
         try? fileManager.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }

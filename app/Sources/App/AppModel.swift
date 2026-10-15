@@ -32,6 +32,7 @@ final class AppModel: ObservableObject {
             Task { @MainActor in self?.refresh() }
         }
         refresh()
+        DebugScript.redirectLogIfRequested()
         if let lang = DebugScript.autostart {
             language = lang
             DispatchQueue.main.async { self.start() }

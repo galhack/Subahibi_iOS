@@ -72,6 +72,19 @@ else ifeq ($(PLATFORM),wasmsim)
   LDLIBS  += -lm
   TARGET  := bin/openbgi-wasmsim
   VORBIS  := none
+else ifeq ($(PLATFORM),apple)
+  # "make apple": the Apple back end (src/os/apple/ with the system files of
+  # src/os/posix/) built for macOS, with tools/apple/hosttest.c as the host:
+  # the engine on its thread, a scripted pointer, pictures written out.  The
+  # iOS / tvOS / visionOS application compiles the same files in Xcode.
+  EXE     :=
+  OS_SRC  := $(wildcard src/os/apple/*.c) $(addprefix src/os/posix/,files.c paths.c process.c registry.c sjis.c thread.c time.c)
+  TOOL_SRC := tools/apple/hosttest.c
+  CFLAGS  += -DBGI_POSIX -DBGI_APPLE -D_DARWIN_C_SOURCE
+  LDLIBS  += -lm -liconv -framework CoreText -framework CoreGraphics -framework CoreFoundation \
+             -framework AudioToolbox -framework ImageIO
+  TARGET  := bin/openbgi-hosttest
+  VORBIS  ?= stb
 else ifeq ($(PLATFORM),win32)
   # CROSS is the toolchain prefix; it must not be given a value (not even an
   # empty one) before this line, or "?=" keeps that and the host's gcc builds
@@ -143,6 +156,9 @@ SRC := $(CORE_SRC) $(ASM_SRC) $(SCN_SRC) $(BPC_SRC) $(VM_SRC) $(WAIT_SRC) $(SYS_
 OBJ := $(patsubst src/%.c,obj/$(PLATFORM)/%.o,$(SRC)) $(patsubst tools/%.c,obj/$(PLATFORM)/tools/%.o,$(TOOL_SRC))
 DEP := $(OBJ:.o=.d)
 LIB_OBJ := $(filter-out obj/$(PLATFORM)/sys/main.o,$(OBJ)) # the engine without its entry point
+ifeq ($(PLATFORM),apple)
+  OBJ := $(LIB_OBJ) # the host (tools/apple/hosttest.c, or the application) has the entry point
+endif
 
 TARGET ?= bin/bgi$(EXE)
 

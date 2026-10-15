@@ -26,6 +26,13 @@ int OsPosix_UnicodeToSjis(uint32_t cp, char out[2]);
 const char* OsPosix_ConfigDir(void);
 // SIGTERM / SIGINT (process.c) -> the window's close request (window.c)
 void OsPosix_RequestClose(void);
+/* An optional redirection of the game directory (the Apple back end: a
+ * translation patch's loose files, the saves kept apart from the data):
+ * called by OsPosix_Path with a path below the drive root, UTF-8 with '/'
+ * separators and no leading separator ("" for the root itself); 1 when it
+ * wrote the POSIX path to use into out (n bytes), 0 to keep the game
+ * directory.  NULL (the default) redirects nothing. */
+extern int (*gPosixPathRedirect)(const char* rel, char* out, size_t n);
 
 /* antialiased text for the back end's own windows (font.c): draw into a
  * 32-bit 0x00RRGGBB buffer (pitch in pixels), measure, the UI font */

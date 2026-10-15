@@ -29,7 +29,9 @@
 #include <signal.h>
 #include <sys/file.h>
 #include <sys/stat.h>
-#include <sys/sysinfo.h>
+#if defined(__linux__)
+#include <sys/sysinfo.h> // machine.c; the Apple back end has its own machine services
+#endif
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <time.h>

@@ -34,6 +34,8 @@ static void MatchCase(const char* dir, char* name)
 	closedir(d);
 }
 
+int (*gPosixPathRedirect)(const char* rel, char* out, size_t n);
+
 /* Shift-JIS Windows path -> UTF-8 POSIX path (into out, n bytes).  A drive
  * letter (any letter) maps to the executable's directory ("C:\" is where
  * the game lives), a leading separator to the file system root; '\\'
@@ -55,6 +57,16 @@ void OsPosix_Path(const char* win, char* out, size_t n)
 		p += 2;
 		if(*p == '\\' || *p == '/')
 			p++;
+		if(gPosixPathRedirect)
+		{ // the redirection sees the path below the root with '/' separators
+			char rel[PATH_MAX * 2];
+			size_t i;
+			for(i = 0; p[i] && i + 1 < sizeof rel; i++)
+				rel[i] = p[i] == '\\' ? '/' : p[i];
+			rel[i] = 0;
+			if(gPosixPathRedirect(rel, out, n))
+				return;
+		}
 		snprintf(cur, sizeof cur, "%s", gPosixExeDir); // the drive root is the game directory
 		o = strlen(cur);
 		if(o && cur[o - 1] == '/')

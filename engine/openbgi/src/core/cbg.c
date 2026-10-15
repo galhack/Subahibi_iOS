@@ -242,6 +242,13 @@ static void CbgUnfilter(uint8_t* pix, const RawImageHeader_t* h)
  * wrong, 0x80000004 when the checksum of the weight table fails. */
 uint32_t BGI_CbgDecode(const void* src, void* dst)
 {
+	return BGI_CbgDecodeSized(src, 0xffffffffu, dst);
+}
+
+/* BGI_CbgDecode with the size of the file at src (0xFFFFFFFF when unknown),
+ * which bounds the reads of the version 2 decoder (cbg2.c) */
+uint32_t BGI_CbgDecodeSized(const void* src, uint32_t srcLen, void* dst)
+{
 	const CbgHeader_t* h = (const CbgHeader_t*)src;
 	const uint8_t* s = (const uint8_t*)src;
 	uint8_t* d = (uint8_t*)dst;
@@ -252,6 +259,8 @@ uint32_t BGI_CbgDecode(const void* src, void* dst)
 
 	if(!BGI_IsCbg(src))
 		return 0x80000003u;
+	if(h->version == 2)
+		return BGI_CbgDecodeV2(src, srcLen, dst);
 
 	table = (uint8_t*)BGI_Alloc(h->encLen);
 	memcpy(table, s + 0x30, h->encLen);

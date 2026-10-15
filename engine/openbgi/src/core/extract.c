@@ -351,7 +351,7 @@ static int WriteEntry(const ArcRead_t* a, const ArcEntry_t* e, const char* outDi
 		uint32_t n = BGI_CbgOutSize(data);
 		uint8_t* img = (uint8_t*)BGI_Alloc(n);
 		RawImageHeader_t h;
-		if(BGI_CbgDecode(data, img) == 0)
+		if(BGI_CbgDecodeSized(data, size, img) == 0)
 		{
 			memcpy(&h, img, sizeof h);
 			snprintf(path, sizeof path, "%s\\%s.bmp", outDir, e->name);

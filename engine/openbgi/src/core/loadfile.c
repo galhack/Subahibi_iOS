@@ -17,6 +17,8 @@
  * file": the loose file is then also looked for in the alternative
  * directory.
  */
+#include <stdio.h>
+#include <stdlib.h>
 #include "bgi/file.h"
 #include "bgi/codec.h"
 #include "bgi/error.h"
@@ -106,6 +108,9 @@ uint32_t LoadFile(void* buf, const char* arc, const char* name)
 		}
 	}
 
+	if(getenv("BGI_LOAD_TRACE")) // development aid: every file the engine loads
+		fprintf(stderr, "load %s:%s %u bytes%s\n", arc ? arc : "-", name, n,
+		        BGI_IsDsc(buf) ? " (DSC)" : BGI_IsCbg(buf) ? " (CBG)" : "");
 	if(BGI_IsDsc(buf))
 	{
 		PixBuf_t tmp;
@@ -120,7 +125,7 @@ uint32_t LoadFile(void* buf, const char* arc, const char* name)
 	{
 		uint32_t size = BGI_CbgOutSize(buf);
 		uint8_t* out = (uint8_t*)BGI_Alloc(size);
-		if(BGI_CbgDecode(buf, out) == 0)
+		if(BGI_CbgDecodeSized(buf, n, out) == 0)
 		{
 			memcpy(buf, out, size);
 			n = size;
@@ -190,7 +195,7 @@ static int DecodeRange(void* dst, const uint8_t* src, uint32_t srcSize, uint32_t
 		if(off != 0 || size != 0) // a size query does not decode the picture
 		{
 			tmp = (uint8_t*)BGI_Alloc(total);
-			if(BGI_CbgDecode(src, tmp) != 0)
+			if(BGI_CbgDecodeSized(src, srcSize, tmp) != 0)
 			{
 				BGI_Free(tmp);
 				return 5;

@@ -76,7 +76,7 @@ typedef struct CbgHeader // file layout, 0x30 bytes
 	uint32_t encLen;   // +0x28 length of the encrypted weight table, bytes
 	uint8_t sum;       // +0x2c check: byte sum of the decrypted weight table
 	uint8_t xor ;      // +0x2d check: byte xor of the decrypted weight table
-	uint16_t version;  // +0x2e not read by the decoder
+	uint16_t version;  // +0x2e 2 selects the coding of cbg2.c, anything else version 1
 					   // +0x30: encLen encrypted bytes, then the Huffman bit stream
 } CbgHeader_t;
 
@@ -99,6 +99,10 @@ int BGI_IsCbg(const void* data);
  * BGI_CbgOutSize(src) bytes.  Returns 0 on success, 0x80000003 if the magic
  * is wrong, 0x80000004 when the checksum of the weight table fails. */
 uint32_t BGI_CbgDecode(const void* src, void* dst);
+// the same with the size of the file at src (0xFFFFFFFF when unknown)
+uint32_t BGI_CbgDecodeSized(const void* src, uint32_t srcLen, void* dst);
+// version 2 (the JPEG-like coding of the later builds, cbg2.c); called by the two above
+uint32_t BGI_CbgDecodeV2(const void* src, uint32_t srcLen, void* dst);
 // the size of the decoded image: header plus tightly packed pixels
 static inline uint32_t BGI_CbgOutSize(const void* src)
 {

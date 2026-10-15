@@ -22,8 +22,8 @@
   （汉化剧本与图片），不需要在电脑上做任何预处理。
 - 应用外壳：SwiftUI + UIKit，一个工程同时构建 iOS/iPadOS、tvOS、visionOS 原生版本。
 
-已在以下真机验证（2026-10）：iPhone 16 Pro Max、iPad Pro、Apple Vision Pro（原生 visionOS 应用），
-日文与中文均可进入剧情；存档、读档跨重启可用；影片可从封包直接播放。Apple TV 4K 见下方说明。
+已在以下真机验证（2026-10）：iPhone 16 Pro Max、iPad Pro、Apple TV 4K、Apple Vision Pro（原生 visionOS 应用），
+日文与中文均可进入剧情；存档、读档跨重启可用；影片可从封包直接播放。
 
 ---
 
@@ -137,7 +137,7 @@ xcrun devicectl device copy to --device <设备> \
 
 ## 存档
 
-- 存档与游戏数据分开保存在应用的 Application Support 中，**日文版与中文版各自独立**
+- 存档与游戏数据分开保存（iPhone/iPad/Vision Pro 在 Application Support，Apple TV 在缓存区），**日文版与中文版各自独立**
   （汉化版存档含 GBK 文本，原版作品同样不能混用）。
 - 首次启动时会把游戏目录中的 `BGI.gdb`（全局设定、已读记录、CG 收集）复制一份作为起点，
   电脑上的进度因此可以带过来。
@@ -148,8 +148,8 @@ xcrun devicectl device copy to --device <设备> \
 ## 已知限制
 
 - 免费 Apple ID 签名 7 天后过期，需要重新安装（不会删除已导入的数据和存档）。
-- Apple TV：tvOS 只允许应用把大文件放在缓存区，系统空间紧张时可能清除游戏数据，届时需重新传输；
-  存档保存在独立目录。
+- Apple TV：tvOS 只允许应用写入缓存区，游戏数据、汉化解包与**存档**都保存在那里；
+  系统空间紧张时可能被清除（届时需重新传输数据，存档也会丢失），重要进度请留意。
 - Vision Pro 的注视不会产生"悬停"，按钮的高亮会在点击时才出现。
 - 汉化补丁的「新章节」部分本身没有汉化（与原补丁一致）。
 - 游戏目录中的 `fcxzzd.arc` 是与游戏无关的文本文件，不需要也不会被传输。

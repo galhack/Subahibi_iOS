@@ -30,7 +30,7 @@ CoreText 字体（日文 SJIS / 中文 GBK+font.ttf 回退）、AudioUnit 拉流
 汉化补丁自动解包（Enigma VFS）、语言选择、遥控器/注视捏合交互、画面适配。
 **Success Criteria**: 四类实机安装运行，能导入数据并游玩。
 **Tests**: 各平台构建通过；实机启动→标题→剧情→存读档（`SUBAHIBI_AUTOSTART` / `SUBAHIBI_SCRIPT` 调试脚本）。
-**Status**: Complete（iPhone 中文、iPad 日文、Vision Pro 日文真机通过；Apple TV 已安装并推送数据，待唤醒后实测）
+**Status**: Complete（iPhone 中文、iPad 日文+中文触控、Apple TV 中文、Vision Pro 日文真机通过）
 
 ## Stage 4: 打磨与验证
 **Goal**: 性能（60fps 呈现、低耗电）、后台/前台切换、存档持久化（tvOS 存储约束）、影片与特效校验。

@@ -252,6 +252,7 @@ int OS_MovieStart(int x, int y, int w, int h, int32_t volume, int32_t* lengthMs)
 	gPos = 0;
 	if(lengthMs)
 		*lengthMs = duration > 0 ? (int32_t)(duration * 1000) : 0;
+	fprintf(stderr, "bgi: movie of %.1f s starts at (%d, %d) %d x %d\n", duration, x, y, w, h);
 	pthread_mutex_lock(&gAppleMovieLock);
 	gRectX = x;
 	gRectY = y;

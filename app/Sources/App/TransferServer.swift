@@ -28,13 +28,38 @@ final class TransferServer: ObservableObject {
 
     private var listener: NWListener?
     private let queue = DispatchQueue(label: "transfer")
-    private static let maxFailedAttempts = 5
-    private var failedAttempts = 0 // on `queue`
+    /// The code and the guessing guard, shared by the main thread and `queue` under `lock`.
+    private let lock = NSLock()
+    private var activeCode = ""
+    private var failures: [Date] = []
+    private var lockedUntil = Date.distantPast
+    private static let maxFailuresPerMinute = 5
+
+    /// At most five wrong codes a minute; then every request is refused for a
+    /// minute, so a 6-digit code cannot be guessed and the lock lifts by itself.
+    private func checkCode(_ given: String) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        let now = Date()
+        if now < lockedUntil || activeCode.isEmpty { return false }
+        if given == activeCode { return true }
+        failures = failures.filter { now.timeIntervalSince($0) < 60 } + [now]
+        if failures.count >= Self.maxFailuresPerMinute {
+            lockedUntil = now.addingTimeInterval(60)
+            failures.removeAll()
+            DispatchQueue.main.async { self.lastEvent = "配对码错误次数过多，暂停接收 1 分钟。" }
+        }
+        return false
+    }
 
     func start() {
         guard listener == nil else { return }
         code = String(format: "%06d", Int.random(in: 0..<1_000_000))
-        queue.sync { failedAttempts = 0 }
+        lock.lock()
+        activeCode = code
+        failures.removeAll()
+        lockedUntil = .distantPast
+        lock.unlock()
         do {
             let params = NWParameters.tcp
             params.allowLocalEndpointReuse = true
@@ -65,6 +90,9 @@ final class TransferServer: ObservableObject {
         listener = nil
         running = false
         code = ""
+        lock.lock()
+        activeCode = ""
+        lock.unlock()
     }
 
     /// The device's IPv4 addresses on Wi-Fi / Ethernet, for the launcher to show.
@@ -125,18 +153,7 @@ final class TransferServer: ObservableObject {
             if key == "content-length" { length = Int64(value) ?? 0 }
             if key == "x-subahibi-code" { given = value }
         }
-        let expected = DispatchQueue.main.sync { self.code }
-        guard !expected.isEmpty, given == expected else {
-            // a few wrong codes end the session: guessing a 6-digit code is not an option
-            failedAttempts += 1
-            if failedAttempts >= Self.maxFailedAttempts {
-                DispatchQueue.main.async {
-                    self.stop()
-                    self.lastEvent = "配对码错误次数过多，已关闭局域网接收。"
-                }
-            }
-            return respond(conn, 403, "wrong pairing code")
-        }
+        guard checkCode(given) else { return respond(conn, 403, "wrong pairing code or locked") }
         guard length >= 0 && length < (4 << 30) else { return respond(conn, 400, "bad length") }
         if method == "GET" && path == "/status" {
             return respond(conn, 200, statusJSON(), type: "application/json")

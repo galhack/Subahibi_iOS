@@ -1,0 +1,35 @@
+# OpenBGI's formatting rules (CONVENTIONS.md): Allman braces, tab indentation,
+# `Type* ptr`, `if(` without a space, indented case labels.
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: ForContinuationAndIndentation
+ColumnLimit: 0
+BreakBeforeBraces: Allman
+PointerAlignment: Left
+SpaceBeforeParens: Never
+IndentCaseLabels: true
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortBlocksOnASingleLine: Never
+AlignTrailingComments: true
+AlignConsecutiveAssignments: None
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: AcrossEmptyLinesAndComments
+AlignEscapedNewlines: Left
+AlignAfterOpenBracket: DontAlign
+AlignOperands: DontAlign
+SortIncludes: Never
+ReflowComments: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 2
+SpaceAfterCStyleCast: false
+BreakBeforeBinaryOperators: None
+BinPackArguments: true
+BinPackParameters: true
+IndentPPDirectives: None
+ContinuationIndentWidth: 4
+SpacesBeforeTrailingComments: 1

@@ -1,0 +1,93 @@
+# This file is part of OpenBGI (https://openbgi.net).
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# nginx in front of tools/wasm/server.js, with TLS (docs/wasm.md)
+#
+# server.js listens on plain HTTP on the loopback interface (its default,
+# --bind 127.0.0.1 --port 8000); nginx terminates TLS and proxies two things:
+# the page and its files (plain requests) and the websocket at /fs, which
+# needs the Upgrade handshake passed through and long timeouts, because the
+# engine sends nothing while the game idles and the default 60 s
+# proxy_read_timeout would cut the connection (the client reconnects, but
+# every cut costs the request in flight).  The page then connects to
+# wss://<host>/fs on its own (the client picks ws:// or wss:// from the
+# page's scheme), so nothing else has to be configured.
+#
+# Put the `map` in the http {} context and the server {} block next to your
+# other sites; replace the host name and the certificate paths.
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name openbgi.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/openbgi.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/openbgi.example.com/privkey.pem;
+
+    # the websocket of the game's files
+    location /fs {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_read_timeout 86400s;   # an idle game sends nothing for a long time
+        proxy_send_timeout 86400s;
+    }
+
+    # the page, its script and the .wasm
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # the .wasm is a few MB: let nginx compress it on the way out
+        gzip on;
+        gzip_types application/wasm text/javascript application/javascript text/html;
+        gzip_min_length 1024;
+    }
+}
+
+# ---- the same under a path instead of a whole host: https://host/bgi/ ----
+# The page's relative links (openbgi.js, openbgi.wasm) and its websocket
+# (<page directory>/fs) are resolved against the page's own URL, so the
+# prefix is passed through as it is; server.js looks only at the last
+# segment of a path.  The redirect gives /bgi its trailing slash, without
+# which the browser would resolve the links against / instead.
+#
+#    location = /bgi { return 301 /bgi/; }
+#
+#    location /bgi/fs {
+#        proxy_pass http://127.0.0.1:8000;
+#        proxy_http_version 1.1;
+#        proxy_set_header Upgrade $http_upgrade;
+#        proxy_set_header Connection $connection_upgrade;
+#        proxy_set_header Host $host;
+#        proxy_buffering off;
+#        proxy_read_timeout 86400s;
+#        proxy_send_timeout 86400s;
+#    }
+#
+#    location /bgi/ {
+#        proxy_pass http://127.0.0.1:8000;
+#        proxy_http_version 1.1;
+#        proxy_set_header Host $host;
+#        proxy_set_header X-Forwarded-Proto $scheme;
+#    }
+
+# plain HTTP only redirects
+server {
+    listen 80;
+    listen [::]:80;
+    server_name openbgi.example.com;
+    return 301 https://$host$request_uri;
+}

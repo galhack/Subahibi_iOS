@@ -1,0 +1,4 @@
+inc/bgi/msg.h
+src/vm/opset.c
+src/asm/opnames.c
+src/asm/opstack.c

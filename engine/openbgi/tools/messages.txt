@@ -1,0 +1,449 @@
+# This file is part of OpenBGI (https://openbgi.net).
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# ID	text (UTF-8, Shift-JIS in the binary)	English translation	[fixed]
+#
+# The engine shows its messages in English unless --lang=ja / BGI_LANG=ja
+# selects the Japanese originals (both are in the binary; see
+# tools/mkmsg.py).  A fourth field "fixed" marks the entries that are never
+# translated: the character-class tables and font names of the text engine,
+# and the labels of the dialogs the scripts open for the player, which are
+# part of the game rather than of the engine.  The printf conversions of a
+# translation must match the original's in order.
+MSG_ASK_ABORT	中止しますか？	Abort?
+MSG_NAME_TOO_LONG	指定されたファイル名 [ %s ] は%d文字を超えています	The specified file name [ %s ] exceeds %d characters
+MSG_FILE_NOT_FOUND	指定されたファイル [ %s ] は存在しません	The specified file [ %s ] does not exist
+MSG_ARC_FILE_NOT_FOUND	指定されたファイル [ %s : %s ] は存在しません	The specified file [ %s : %s ] does not exist
+MSG_BAD_POINTER_REGION	指定されたポインタ [ $%.8X ] は無効な領域を示しています	The specified pointer [ $%.8X ] points into an invalid region
+MSG_BAD_POINTER	無効なポインタ [ $%.8X ] にアクセスしようとしました	Attempted to access an invalid pointer [ $%.8X ]
+MSG_UNDEFINED_OP	未定義の基本命令 $%02X を検出しました	Undefined base instruction $%02X encountered
+MSG_SOMETHING_WRONG	何らかの問題が発生しました	Some problem has occurred
+MSG_NOTICE	通知	Notice
+MSG_SDC_ENCODE_FAILED	信じられない事にSDCエンコーディングに失敗した	Unbelievably, SDC encoding failed
+MSG_CPU_UNSUPPORTED	このハードウェアに搭載されているCPUはサポート対象外です	The CPU installed in this hardware is not supported
+MSG_CPU_NO_INSN	このハードウェアに搭載されているCPUはプログラムの実行に不可欠な命令をサポートしていません	The CPU installed in this hardware does not support instructions essential to running the program
+MSG_NO_DIRECTX	実行に必要なDirectX（8.0以降）がインストールされていません	The DirectX (8.0 or later) required to run is not installed
+MSG_SP_OUT_OF_RANGE	SPにスタック領域のサイズを超える値 $%X が設定されました	SP was set to a value $%X exceeding the size of the stack area
+MSG_JUMP_TO_NULL	ジャンプ／コール先にNULLポインタが指定されました	A NULL pointer was specified as the jump/call target
+MSG_IP_OUT_OF_RANGE	IPにコード領域のサイズを超える値 $%X が設定されました	IP was set to a value $%X exceeding the size of the code area
+MSG_STACK_FULL	スタック領域が不足しています	Insufficient stack area
+MSG_FMT_INCOMPLETE	型フィールド文字が不完全な記述で終了しています	A type field character ends in an incomplete description
+MSG_FMT_BAD_TYPE	使用が許可されていない型フィールド文字 [ %c ] が検出されました	A disallowed type field character [ %c ] was detected
+MSG_FMT_TOO_MANY	書式付き文字列内に型フィールド文字は16個までしか記述できません	At most 16 type field characters may appear in a format string
+MSG_ALLOC_TOO_BIG	無効なサイズ [ %d ] のメモリ領域を確保しようとしました\nメモリサイズは最大で [ %d ] までしか確保できません	Attempted to allocate a memory area of invalid size [ %d ]\nAt most [ %d ] bytes of memory can be allocated
+MSG_LALLOC_FAILED	ローカルメモリの確保に失敗しました	Local memory allocation failed
+MSG_NOT_LOCAL_PTR	指定されたポインタ [ $%X ] はローカルメモリのポインタではありません	The specified pointer [ $%X ] is not a local memory pointer
+MSG_LFREE_FAILED	指定されたローカルメモリのポインタは解放できません	The specified local memory pointer cannot be freed
+MSG_WATCH_HIT	%s\n\n領域名 : %s - address : $%.8X , size : %dbytes\n\naccessed address : $%.8X , accessed size : %dbytes	%s\n\nregion name : %s - address : $%.8X , size : %dbytes\n\naccessed address : $%.8X , accessed size : %dbytes
+MSG_WATCH_WRITE	監視領域に対するデータの書き込みが検出されました	A data write to a watched region was detected
+MSG_CONFIRM	確認	Confirm
+MSG_BAD_DUMP_SIZE	無効なダンプサイズ [ %d ] が指定されました	An invalid dump size [ %d ] was specified
+MSG_UNDEF_SYS	未定義のシステム制御命令 $80%02X を検出しました	Undefined system control instruction $80%02X encountered
+MSG_UNDEF_GFX90	未定義のグラフィック制御命令 $90%02X を検出しました	Undefined graphics control instruction $90%02X encountered
+MSG_UNDEF_GFX91	未定義のグラフィック制御命令 $91%02X を検出しました	Undefined graphics control instruction $91%02X encountered
+MSG_UNDEF_GFX92	未定義のグラフィック制御命令 $92%02X を検出しました	Undefined graphics control instruction $92%02X encountered
+MSG_UNDEF_SND	未定義のサウンド制御命令 $A0%02X を検出しました	Undefined sound control instruction $A0%02X encountered
+MSG_UNDEF_EXTB0	未定義の拡張命令 $B0%02X を検出しました	Undefined extended instruction $B0%02X encountered
+MSG_UNDEF_EXTC0	未定義の拡張命令 $C0%02X を検出しました	Undefined extended instruction $C0%02X encountered
+MSG_UNDEF_SYS7F	未定義のシステム制御命令 $7F%02X を検出しました	Undefined system control instruction $7F%02X encountered
+MSG_UNDEF_SYS81	未定義のシステム制御命令 $81%02X を検出しました	Undefined system control instruction $81%02X encountered
+MSG_UNDEF_EVAL	未定義の評価命令 $D0%02X を検出しました	Undefined evaluation instruction $D0%02X encountered
+MSG_UNDEF_EXTE0	未定義の拡張命令 $E0%02X を検出しました	Undefined extended instruction $E0%02X encountered
+MSG_THREAD_CODE_FULL	生成されたスレッドのコード領域のサイズが不足しているので、プログラム [ %s : %s ] を読み込むことができません	The code area of the created thread is too small, so the program [ %s : %s ] cannot be loaded
+MSG_PROGRAM_NOT_FOUND	指定されたプログラム [ %s : %s ] は存在しません	The specified program [ %s : %s ] does not exist
+MSG_BAD_USEROP_SLOT	無効なユーザー定義命令・プログラム番号 [ %d ] が指定されました	An invalid user-defined instruction program number [ %d ] was specified
+MSG_UNDEF_USEROP	未定義のユーザー定義命令 $FF%02X を検出しました	Undefined user-defined instruction $FF%02X encountered
+MSG_UNDEF_USEROP_MGMT	未定義のユーザー定義命令・管理命令 $FF%02X を検出しました	Undefined user-defined instruction management instruction $FF%02X encountered
+MSG_USEROP_CODE_FULL	コード領域のサイズが不足しているので、ユーザー定義命令 $FF%02X を実行できません	The code area is too small, so user-defined instruction $FF%02X cannot be executed
+# "80 xx" system-control instructions (ops_sys.c)
+MSG_BAD_STANDARD_KEY	無効なスタンダードキー [ $%.8X ] が指定されました	An invalid standard key [ $%.8X ] was specified
+MSG_KEY_LIST_TOO_LONG	指定されたキー配列は長過ぎます\n\nキー配列の長さは [ %d ] エレメント以内でなければなりません	The specified key array is too long\n\nThe key array must be at most [ %d ] elements long
+MSG_GLOBAL_FULL	グローバル領域に空きがありません	No free space in the global area
+MSG_GFREE_BAD_ADDRESS	グローバルメモリの解放の対象に不正なアドレス $%X が指定されました	An illegal address $%X was specified for freeing global memory
+MSG_MAIN_PROGRAM_UNLOADED	メインプログラムまで削除されてしまいました	Even the main program has been removed
+MSG_BAD_THREAD_HANDLE	無効なスレッドハンドルが指定されました	An invalid thread handle was specified
+MSG_BAD_THREAD_MSG_COUNT	無効なスレッドメッセージ数 [ %d ] が指定されました	An invalid thread message count [ %d ] was specified
+MSG_BAD_PIXEL_MODE	無効なピクセルモードが設定されました	An invalid pixel mode was set
+MSG_BAD_SCREEN_SIZE	無効なスクリーンサイズが設定されました	An invalid screen size was set
+MSG_STYLE_KEYS_TOO_LONG	ディスプレイスタイルチェンジの対象として指定されたキーの配列が長過ぎます	The key array specified for the display style change is too long
+MSG_BAD_CURSOR_SHAPE	指定されたマウスカーソル形状番号 [ %d ] は無効です	The specified mouse cursor shape number [ %d ] is invalid
+MSG_BAD_SIZE_NUMBER	無効なサイズ番号 [ %d ] が指定されました	An invalid size number [ %d ] was specified
+MSG_SAVE_COMMENT_TOO_LONG	付加情報文字列が長すぎます\n\n文字列は%d文字以内である必要があります	The additional information string is too long\n\nThe string must be at most %d characters
+MSG_GDB_CORRUPT	グローバルデータベースファイルが破損しています	The global database file is corrupt
+MSG_BAD_OFFSET_SIZE	オフセット [ $%.8X ] から無効なデータサイズ [ %d ] が指定されました	From offset [ $%.8X ] an invalid data size [ %d ] was specified
+MSG_BAD_OFFSET	無効なオフセット [ $%.8X ] が指定されました	An invalid offset [ $%.8X ] was specified
+MSG_GFLAG_BAD_INDEX	グローバルフラググループ [ %s ] に対して無効なフラグ番号 [ %d ] が指定されました	For global flag group [ %s ] an invalid flag number [ %d ] was specified
+MSG_GFLAG_GROUP_UNKNOWN	指定されたグローバルフラググループ [ %s ] は登録されていません	The specified global flag group [ %s ] is not registered
+MSG_GFLAG_BAD_COUNT	グローバルフラググループ [ %s ] のフラグ番号 [ %d ] からの連続フラグ数 [ %d ] は無効です	In global flag group [ %s ], from flag number [ %d ] the run of [ %d ] consecutive flags is invalid
+MSG_HIST_MSG_TOO_LONG	指定されたメッセージは%d文字を超えています	The specified message exceeds %d characters
+MSG_HIST_NAME_TOO_LONG	指定された名前は%d文字を超えています	The specified name exceeds %d characters
+MSG_HIST_FILE_TOO_LONG	指定されたファイル名は%d文字を超えています	The specified file name exceeds %d characters
+MSG_HIST_ARC_TOO_LONG	指定されたアーカイブ名は%d文字を超えています	The specified archive name exceeds %d characters
+MSG_BAD_HISTORY_INDEX	無効なヒストリインデックス [ %d ] が指定されました	An invalid history index [ %d ] was specified
+MSG_HIST2_READING_TOO_LONG	読み仮名リストが%d文字を超えています	The reading (furigana) list exceeds %d characters
+MSG_HIST2_MSG_TOO_LONG	メッセージが%d文字を超えています	The message exceeds %d characters
+MSG_HIST2_NAME_TOO_LONG	名前が%d文字を超えています	The name exceeds %d characters
+MSG_HIST2_FILE_TOO_LONG	ファイル名が%d文字を超えています	The file name exceeds %d characters
+MSG_HIST2_ARC_TOO_LONG	アーカイブ名が%d文字を超えています	The archive name exceeds %d characters
+MSG_EXEC_FILE_NULL	外部プログラムのファイル名にNULLポインタが指定されました	A NULL pointer was specified as the external program's file name
+MSG_CODE_AREA_FULL	コード領域のサイズが不足しているので、プログラム [ %s : %s ] を読み込むことができません	The code area is too small, so the program [ %s : %s ] cannot be loaded
+MSG_BAD_VIRTUAL_KEY	不正な仮想キーコードが指定されています	An illegal virtual key code was specified
+MSG_WINMSG_LOST	検出対象となるWindowsMessageが削除されてしまっている	The Windows message to be detected has already been deleted
+MSG_BUG_FOUND	バグ発見！！	Bug found!!
+MSG_ENCODE_THREAD_FAILED	エンコーディング用スレッドの作成に失敗しました	Failed to create the encoding thread
+MSG_SDC_THREAD_FATAL	SDCエンコーディング中に致命的なエラーが発生した	A fatal error occurred during SDC encoding
+MSG_DCFS_THREAD_FATAL	構造体圧縮中に致命的なエラーが発生した	A fatal error occurred during structure compression
+MSG_WINDOW_CREATE_FAILED	メインウィンドウの生成に失敗しました	Failed to create the main window
+MSG_WINCLASS_FAILED	メインウィンドウクラスの登録に失敗しました	Failed to register the main window class
+MSG_CHILDCLASS_FAILED	チャイルドウィンドウクラスの登録に失敗しました	Failed to register the child window class
+# installer (src/sys/install/)
+MSG_ERROR_CAPTION	エラー	Error
+MSG_INST_WRITE_ERROR	書き込みエラーが発生しました	A write error occurred
+MSG_INST_READ_ERROR	読み込みエラーが発生しました	A read error occurred
+MSG_INST_CREATE_FAILED	ファイルの作成に失敗しました	Failed to create the file
+MSG_INST_FILE_BROKEN	インストール対象となっている [ %s ] は破損しています	The installation target [ %s ] is corrupt
+MSG_INST_INSTALLING	%sをインストール中	Installing %s
+MSG_INST_UNINST_COPY_FAILED	アンインストーラーのコピーに失敗しました	Failed to copy the uninstaller
+MSG_INST_UNINST_LIST_FAILED	アンインストーレーションファイルの出力に失敗しました	Failed to write the uninstallation file
+MSG_INST_BAD_PATH	無効なパスが指定されています	An invalid path was specified
+MSG_INST_BAD_FOLDER	無効なフォルダが指定されました	An invalid folder was specified
+MSG_INST_SELECT_FOLDER	フォルダの選択	Select a folder
+# ---- text engine character tables ------------------------------------------
+MSG_TXT_BRACKET_KAGI	「	opening corner bracket, hung into the margin for a leading control byte 4	fixed
+MSG_TXT_BRACKET_SPACE	　	ideographic space, control byte 5	fixed
+MSG_TXT_BRACKET_PAREN	（	full-width opening parenthesis, control byte 6	fixed
+MSG_TXT_BRACKET_QUOTE	“	opening double quote, control byte 7	fixed
+MSG_TXT_BRACKET_KAGI2	『	opening white corner bracket, control byte 8	fixed
+MSG_TXT_HANG_BRACKETS	「　（“『	the brackets that may hang into the left margin at a paragraph start	fixed
+MSG_TXT_CLOSING_RUN	"',.､｡:;?!ﾞﾟ･，．、。：；？！”゛゜‐]})）〕］｝〉≫》」』】ヽヾゝゞ々	punctuation that is collected after a character so a line never starts with it (kinsoku run)	fixed
+MSG_TXT_CLOSING	,.､｡ﾞﾟ，．、。？！”゛゜]})）〕］｝〉≫》」』】ヽヾゝゞ々	closing punctuation allowed to overhang the right margin	fixed
+MSG_TXT_OPENING	[{(（〔［｛〈≪《「『【“	opening brackets that may not end a line	fixed
+MSG_TXT_VERT_SHIFT	，．、。ぁぃぅぇぉっゃゅょァィゥェォッャュョ	glyphs shifted towards the top right in vertical text (the first four more than the rest)	fixed
+MSG_TXT_VERT_ROTATE	「」『』【】《》〔〕＜＞≪≫〈〉（）｛｝［］＝≒－÷／｜‥…―─～ー：；	glyphs rotated 90 degrees in vertical text	fixed
+# ---- font face names -------------------------------------------------------
+MSG_FONT_GOTHIC	ＭＳ ゴシック	"MS Gothic" (full-width letters), font number 0	fixed
+MSG_FONT_MINCHO	ＭＳ 明朝	"MS Mincho", font number 1	fixed
+MSG_BAD_SE_SLOT	無効な効果音番号 [ %d ] が指定されました	An invalid sound-effect number [ %d ] was specified
+MSG_BAD_PAN	無効なパンポット（定位） [ %d ] が指定されました	An invalid panpot (position) [ %d ] was specified
+MSG_BAD_VOLUME	無効なボリューム（音量） [ %d ] が指定されました	An invalid volume [ %d ] was specified
+MSG_BAD_BGM_CHANNEL	無効な音楽チャンネル番号 [ %d ] が指定されました	An invalid music channel number [ %d ] was specified
+MSG_BAD_DIV_COUNT	無効な分割回数 [ %d ] が指定されました	An invalid division count [ %d ] was specified
+MSG_BAD_FONT_NO	無効なフォント番号 [ %d ] が指定されました	An invalid font number [ %d ] was specified
+MSG_BAD_VKEY	不正な仮想キーコードが指定されています	An illegal virtual key code was specified
+MSG_BAD_BITMAP_NO	無効なビットマップ番号 [ %d ] が指定されました	An invalid bitmap number [ %d ] was specified
+MSG_BAD_PRIORITY	無効なプライオリティ [ %d ] が指定されました	An invalid priority [ %d ] was specified
+MSG_BITMAP_NOT_REGISTERED	指定されたビットマップエントリ [ %d ] にはビットマップが登録されていません	No bitmap is registered in the specified bitmap entry [ %d ]
+MSG_BAD_EFFECT_MODE	無効なエフェクトモード [ %d ] が指定されました	An invalid effect mode [ %d ] was specified
+MSG_BAD_EFFECT_LEVEL	無効なエフェクトレベル／トランスペアレンシィ／アディションレベル [ %d ] が指定されました	An invalid effect level / transparency / addition level [ %d ] was specified
+MSG_BAD_MIX_RATIO	無効な混合比 [ %d ] が指定されました	An invalid mix ratio [ %d ] was specified
+MSG_BAD_TRANSPARENCY	無効な透明度 [ %d ] が指定されました	An invalid transparency [ %d ] was specified
+MSG_BAD_FRAME_RATE	無効なフレームレート [ %d ] が指定されました	An invalid frame rate [ %d ] was specified
+MSG_BAD_CACHE_SIZE	無効なキャッシュサイズ [ %d ] が指定されました	An invalid cache size [ %d ] was specified
+MSG_BAD_AA_LEVEL	無効なアンチエイリアスレベル [ %d ] が指定されました	An invalid anti-aliasing level [ %d ] was specified
+MSG_BAD_FONT_SIZE	無効なフォントサイズ [ %d ] が指定されました	An invalid font size [ %d ] was specified
+MSG_BAD_FONT_WIDTH	無効なフォント幅 [ %d ] が指定されました	An invalid font width [ %d ] was specified
+MSG_BAD_FONT_CACHE_AMOUNT	無効なキャッシュ量 [ %d ] が指定されました	An invalid cache amount [ %d ] was specified
+MSG_BMP_NOT_WINDOWS	指定されたBMPファイル [ %s : %s ] はWindows用のデータではありません	The specified BMP file [ %s : %s ] is not Windows data
+MSG_BMP_BAD_PLANES	指定されたBMPファイル [ %s : %s ] はサポート外のプレーン数のデータです	The specified BMP file [ %s : %s ] has an unsupported plane count
+MSG_BMP_BAD_BITCOUNT	指定されたBG/BMPファイル [ %s : %s ] はサポート外のビットカウントのデータです	The specified BG/BMP file [ %s : %s ] has an unsupported bit count
+MSG_BMP_COMPRESSED	指定されたBMPファイル [ %s : %s ] は圧縮されているので扱えません	The specified BMP file [ %s : %s ] is compressed and cannot be handled
+MSG_BMP_BAD_SIZE	指定されたBMPファイル [ %s : %s ] は無効なサイズのデータです	The specified BMP file [ %s : %s ] has an invalid size
+MSG_BMP_OUT_OF_MEMORY	指定されたBG/BMPファイル [ %s : %s ] はメモリ不足のため読み込めません	The specified BG/BMP file [ %s : %s ] cannot be loaded for lack of memory
+MSG_BAD_PIXEL_MODE_NO	無効なピクセルモード [ %d ] が指定されています	An invalid pixel mode [ %d ] is specified
+MSG_BMP_NOT_EXIST	指定されたビットマップ [ %d ] は存在しません	The specified bitmap [ %d ] does not exist
+MSG_BMP_GET_BAD_SIZE	指定されたイメージの格納先のサイズ [ %d ] ではイメージを取得できません	The image cannot be fetched into a destination of the specified size [ %d ]
+MSG_BMP_DST_NOT_EXIST	指定された出力先ビットマップ [ %d ] は存在しません	The specified destination bitmap [ %d ] does not exist
+MSG_BMP_SRC_NOT_EXIST	指定された出力元ビットマップ [ %d ] は存在しません	The specified source bitmap [ %d ] does not exist
+MSG_BMP_MODE_MISMATCH	出力先ビットマップ [ %d ] と出力元ビットマップ [ %d ] のピクセルモードには互換性がありません	The pixel modes of destination bitmap [ %d ] and source bitmap [ %d ] are incompatible
+MSG_GRAY_NOT_EXIST	指定された参照元グレイスケール [ %d ] は存在しません	The specified reference grayscale [ %d ] does not exist
+MSG_BMP_NOT_GRAY	指定されたビットマップ [ %d ] はグレイスケールではありません	The specified bitmap [ %d ] is not a grayscale
+MSG_GRAY_BAD_SIZE	指定された参照元グレイスケール [ %d ] はサイズが無効です	The specified reference grayscale [ %d ] has an invalid size
+MSG_STORE_BMP_INVALID	格納先として指定されたビットマップ [ %d ] は無効です	The bitmap [ %d ] specified as the destination is invalid
+MSG_REF_BMP_INVALID	参照元として指定されたビットマップ [ %d ] は無効です	The bitmap [ %d ] specified as the reference is invalid
+MSG_STORE_REF_MODE_MISMATCH	格納先ビットマップ [ %d ] と参照元ビットマップ [ %d ] のピクセルモードが一致していません	The pixel modes of destination bitmap [ %d ] and reference bitmap [ %d ] do not match
+MSG_VEC1_INVALID	第一ベクトルマップとして指定されたビットマップ [ %d ] は無効です	The bitmap [ %d ] specified as the first vector map is invalid
+MSG_VEC2_INVALID	第二ベクトルマップとして指定されたビットマップ [ %d ] は無効です	The bitmap [ %d ] specified as the second vector map is invalid
+MSG_BAD_EFFECT_LEVEL_SHORT	無効なエフェクトレベル [ %d ] が指定されました	An invalid effect level [ %d ] was specified
+MSG_STORE_REF_SIZE_MODE_MISMATCH	格納先ビットマップ [ %d ] と参照元ビットマップ [ %d ] のサイズ又はピクセルモードが一致していません	The size or pixel mode of destination bitmap [ %d ] and reference bitmap [ %d ] do not match
+MSG_BAD_GRADIENT_TYPE	無効なグラデーションタイプ [ %d ] が指定されました	An invalid gradient type [ %d ] was specified
+MSG_BAD_OUTPUT_RANGE	無効な出力範囲 [ %d, %d ] が指定されました	An invalid output range [ %d, %d ] was specified
+MSG_BAD_REF_RANGE	無効な参照範囲 [ %d, %d ] が指定されました	An invalid reference range [ %d, %d ] was specified
+MSG_BMP_INCOMPATIBLE	ビットマップ [ %d ] とビットマップ [ %d ] には互換性がありません	Bitmap [ %d ] and bitmap [ %d ] are incompatible
+MSG_BAD_SCALE	無効な伸縮倍率 [ %d ] が指定されました	An invalid scale factor [ %d ] was specified
+MSG_XFER_DST_INVALID	指定された転送先ビットマップ [ %d ] は無効です	The specified transfer destination bitmap [ %d ] is invalid
+MSG_XFER_SRC_INVALID	指定された転送元ビットマップ [ %d ] は無効です	The specified transfer source bitmap [ %d ] is invalid
+MSG_OUT_BMP_INVALID	指定された出力先ビットマップ [ %d ] は無効です	The specified destination bitmap [ %d ] is invalid
+MSG_COPY_SRC_INVALID	指定された複写元ビットマップ [ %d ] は無効です	The specified copy source bitmap [ %d ] is invalid
+MSG_BAD_COPY_RANGE	無効な複写範囲 [ %d , %d ] が指定されました	An invalid copy range [ %d , %d ] was specified
+MSG_MOVE2_BAD_X_VECTOR	指定された経由Ｘ座標 [ %d ] / 目標Ｘ座標 [ %d ] ではＸ方向のベクトルの一貫性がとれません	The via X coordinate [ %d ] / target X coordinate [ %d ] give an inconsistent X direction vector
+MSG_BAD_POINT_COUNT	無効な座標数 [ %d ] が指定されました	An invalid number of coordinates [ %d ] was specified
+MSG_BAD_QUAKE_PATTERN	無効な振動パターン [ %d ] が指定されました	An invalid vibration pattern [ %d ] was specified
+MSG_BAD_FREQUENCY	無効な周波数 [ %d ] が指定されました	An invalid frequency [ %d ] was specified
+MSG_BAD_REPEAT_COUNT	無効な繰り返し回数 [ %d ] が指定されました	An invalid repeat count [ %d ] was specified
+MSG_BAD_PARAM_NO	サポートされていないパラメータ番号 [ 0x%.8X ] が設定されました	An unsupported parameter number [ 0x%.8X ] was set
+MSG_BAD_PARAM_ARGS	設定対象パラメータ [ 0x%.8X ] の引数 [ %d ( 0x%.8X ) , %d ( 0x%.8X ) ] に誤りがあります	For parameter [ 0x%.8X ] the arguments [ %d ( 0x%.8X ) , %d ( 0x%.8X ) ] are wrong
+MSG_BMP_INVALID	指定されたビットマップ [ %d ] は無効です	The specified bitmap [ %d ] is invalid
+MSG_BG_BMP_UNUSABLE	指定されたビットマップ [ %d ] は存在しないか、背景には使用できません	The specified bitmap [ %d ] does not exist or cannot be used as a background
+MSG_BG_BMP2_UNUSABLE	指定されたビットマップ [ %d , %d ] のいずれかは存在しないか、背景には使用できません	One of the specified bitmaps [ %d , %d ] does not exist or cannot be used as a background
+MSG_BG_SCROLL_BAD_POS	背景（Sモード）に対して無効な表示座標 [ %d , %d ] が指定されました	An invalid display position [ %d , %d ] was specified for the background (S mode)
+MSG_BG_BMP4_UNUSABLE	指定されたビットマップ [ %d , %d , %d , %d ] のいずれかは存在しないか、背景には使用できません	One of the specified bitmaps [ %d , %d , %d , %d ] does not exist or cannot be used as a background
+MSG_GRAY_UNSUITABLE	指定されたグレイスケールビットマップ [ %d ] は相応しくありません	The specified grayscale bitmap [ %d ] is not suitable
+MSG_BAD_BMP_COUNT	無効なビットマップ数 [ %d ] が指定されました	An invalid bitmap count [ %d ] was specified
+MSG_BG_LIST_HEAD	指定されたビットマップ [ 	The specified bitmaps [ 
+MSG_BG_LIST_TAIL	%s%d ] の中に無効もしくは背景として表示できないものが含まれています	%s%d ] include one that is invalid or cannot be displayed as a background
+MSG_BMP_NOT_SCREEN_SIZE	指定されたビットマップ [ %d ] はスクリーンサイズと一致していません	The specified bitmap [ %d ] does not match the screen size
+MSG_VDMAP_NOT_EXIST	指定されたベクトル＆ディスタンスマップ [ %d ] は存在しません	The specified vector & distance map [ %d ] does not exist
+MSG_VDMAP_UNSUITABLE	指定されたビットマップ [ %d ] はベクトル＆ディスタンスマップではない、或いはスクリーンサイズとピクセル数が一致していません	The specified bitmap [ %d ] is not a vector & distance map, or its pixel count does not match the screen size
+MSG_RIPPLE_NOT_REGISTERED	指定された波紋 [ %d ] は登録されていません	The specified ripple [ %d ] is not registered
+MSG_RIPPLE_MISMATCH	指定された波紋 [ %d ] はベクトル＆ディスタンスマップ [ %d ] に適合しません	The specified ripple [ %d ] does not fit vector & distance map [ %d ]
+MSG_BAD_REF_RANGE2	無効な参照範囲 [ %d , %d ] が指定されました	An invalid reference range [ %d , %d ] was specified
+MSG_BG_FRONT_UNUSABLE	指定された表側ビットマップ [ %d ] は存在しないか、背景には使用できません	The specified front bitmap [ %d ] does not exist or cannot be used as a background
+MSG_BG_BACK_UNUSABLE	指定された裏側ビットマップ [ %d ] は存在しないか、背景には使用できません	The specified back bitmap [ %d ] does not exist or cannot be used as a background
+MSG_BAD_STYLE	無効なスタイル [ %d ] が指定されました	An invalid style [ %d ] was specified
+MSG_BAD_LINK_STATE	無効な連動状態 [ %d ] が指定されました	An invalid link state [ %d ] was specified
+MSG_BAD_BITMAP	無効なビットマップ [ %d ] が指定されました	An invalid bitmap [ %d ] was specified
+MSG_NOT_SCREEN_GRAY	ビットマップ [ %d ] はスクリーンサイズのグレイスケールではありません	Bitmap [ %d ] is not a screen-sized grayscale
+MSG_BMP2_INVALID	指定されたビットマップ [ %d , %d ] のいずれかが無効です	One of the specified bitmaps [ %d , %d ] is invalid
+MSG_BMP2_SIZE_MISMATCH	ビットマップ [ %d , %d ] のサイズが一致しません	The sizes of bitmaps [ %d , %d ] do not match
+MSG_BAD_SCALE2	無効な伸縮倍率 [ %d , %d ] が指定されました	An invalid scale factor [ %d , %d ] was specified
+MSG_FILTER_BMP_UNSUITABLE	指定されたフィルタリング用ビットマップ [ %d  ] は不適切です	The specified filtering bitmap [ %d  ] is unsuitable
+MSG_NOT_SPRITE_BMP	ビットマップ [ %d ] はスプライトとしては表示できません	Bitmap [ %d ] cannot be displayed as a sprite
+MSG_VDMAP_INVALID	ベクトル＆ディスタンスマップとして指定されたビットマップ [ %d ] は無効です	The bitmap [ %d ] specified as the vector & distance map is invalid
+MSG_BAD_MAX_DISTANCE	無効なディスタンスの最大値 [ %d ] が指定されました	An invalid maximum distance [ %d ] was specified
+MSG_BMP2_SIZE_MODE_MISMATCH	指定されたビットマップ [ %d , %d ] のサイズ／ピクセルモードが一致しません	The size / pixel mode of the specified bitmaps [ %d , %d ] do not match
+MSG_BAD_PROJ_SCALE	無効な投射スケール [ %d ] が指定されました	An invalid projection scale [ %d ] was specified
+MSG_BMP_NOT_SCREEN_SIZED	指定されたビットマップ [ %d ] はスクリーンサイズではありません	The specified bitmap [ %d ] is not screen-sized
+MSG_MAP_BMP_MISMATCH	ビットマップ [ %d ] は指定されたマップオブジェクトに適合しません	Bitmap [ %d ] does not fit the specified map object
+MSG_BAD_VIEW_SIZE	無効なビューサイズ [ %d , %d ] が指定されました	An invalid view size [ %d , %d ] was specified
+MSG_BAD_CHIP_SIZE	無効なチップサイズ [ %d , %d ] が指定されました	An invalid chip size [ %d , %d ] was specified
+MSG_BAD_TERRAIN_SIZE	無効な地形情報幅 [ %d , %d ] が指定されました	An invalid terrain data width [ %d , %d ] was specified
+MSG_BAD_WINDOW_SIZE	無効なウィンドウ幅 [ %d , %d ] が指定されました	An invalid window width [ %d , %d ] was specified
+MSG_NOT_FRAME_BMP	ビットマップ [ %d ] はウィンドウフレームとして使用できません	Bitmap [ %d ] cannot be used as a window frame
+MSG_BAD_MODE	無効なモード [ %d ] が指定されました	An invalid mode [ %d ] was specified
+MSG_BAD_PROCESS_TYPE	指定された処理タイプ [ %d ] は無効です	The specified processing type [ %d ] is invalid
+MSG_BMP_SCREEN_INCOMPATIBLE	指定されたビットマップ [ %d ] は存在しないか、スクリーンと互換性がありません	The specified bitmap [ %d ] does not exist or is incompatible with the screen
+MSG_BAD_COORDS	無効な座標 [ %d , %d ] が指定されました	Invalid coordinates [ %d , %d ] were specified
+MSG_BAD_DENSITY	無効な濃度 [ %d ] が指定されました	An invalid density [ %d ] was specified
+MSG_BAD_CHAR_COUNT	無効な文字数 [ %d ] が指定されました	An invalid character count [ %d ] was specified
+MSG_BMP_UNSUITABLE	指定されたビットマップ [ %d ] は適合しません	The specified bitmap [ %d ] does not fit
+MSG_BAD_ITEM_COUNT	無効な項目数 [ %d ] が指定されました	An invalid item count [ %d ] was specified
+MSG_BAD_INITIAL_ITEM	無効な初期選択項目番号 [ %d ] が指定されました	An invalid initial selection item number [ %d ] was specified
+MSG_BAD_COLUMN_COUNT	無効な縦列数 [ %d ] が指定されました	An invalid column count [ %d ] was specified
+MSG_VEC1_UNSUITABLE	第一ベクトルマップとして指定されたビットマップ [ %d ] はベクトルマップではない、\n\n若しくは格納先ビットマップ [ %d ] とサイズが一致していません	The bitmap [ %d ] specified as the first vector map is not a vector map,\n\nor its size does not match destination bitmap [ %d ]
+MSG_VEC2_UNSUITABLE	第二ベクトルマップとして指定されたビットマップ [ %d ] はベクトルマップではない、\n\n若しくは格納先ビットマップ [ %d ] とサイズが一致していません	The bitmap [ %d ] specified as the second vector map is not a vector map,\n\nor its size does not match destination bitmap [ %d ]
+MSG_BAD_OBJ_HANDLE	無効なオブジェクトハンドルが指定されました	An invalid object handle was specified
+MSG_BAD_SPRITE_HANDLE	無効なスプライトハンドルが指定されました	An invalid sprite handle was specified
+MSG_BAD_WINDOW_HANDLE	無効なウィンドウハンドルが指定されました	An invalid window handle was specified
+MSG_BAD_MAP_HANDLE	無効なマップハンドルが指定されました	An invalid map handle was specified
+MSG_BAD_FILTER_HANDLE	無効なフィルターハンドルが指定されました	An invalid filter handle was specified
+MSG_WINDOW_NO_FONT	指定されたウィンドウにはフォントが設定されていません	No font is set for the specified window
+MSG_BAD_UPDATE_RECT	無効な更新領域情報が指定されました	Invalid update region information was specified
+MSG_OBJ_BAD_IMAGE_SIZE	指定されたディスプレイオブジェクトは無効なイメージサイズが設定されています	The specified display object has an invalid image size set
+MSG_OBJ_IS_VIRTUAL	指定されたディスプレイオブジェクトは仮想オブジェクトです	The specified display object is a virtual object
+MSG_OBJ_NO_CACHE	指定されたディスプレイオブジェクトはイメージキャッシュをサポートしていません	The specified display object does not support an image cache
+MSG_SPRITE_HAS_PROC	指定されたスプライトには協調しているプロシージャが存在します	The specified sprite has a cooperating procedure
+MSG_SPRITE_HAS_OWNER	指定されたスプライトにはオーナーが存在します	The specified sprite has an owner
+MSG_OBJ_NOT_INITIALISED	指定されたオブジェクトは初期化が完了していません	The specified object has not finished initialising
+MSG_WINDOW_NO_RESOURCES	指定されたウィンドウは必要なリソースが確保されていません	The specified window has not acquired the necessary resources
+MSG_WINDOW_HAS_PROC	指定されたウィンドウには協調しているプロシージャが存在します	The specified window has a cooperating procedure
+MSG_WINDOW_HAS_OWNER	指定されたウィンドウにはオーナーが存在します	The specified window has an owner
+MSG_NO_MORE_MAPS	これ以上、マップオブジェクトを生成する事は出来ません	No more map objects can be created
+MSG_NO_MORE_FILTERS	これ以上、フィルターオブジェクトを生成する事は出来ません	No more filter objects can be created
+MSG_NO_MORE_SPRITES	これ以上、スプライトオブジェクトを生成する事は出来ません	No more sprite objects can be created
+MSG_NO_MORE_WINDOWS	これ以上、ウィンドウオブジェクトを生成することはできません	No more window objects can be created
+MSG_BAD_FRAME_RATE_FREQ	無効なフレームレート [ %d ] が指定されました\n\nフレームレートは周波数と等しいか高くなければなりません	An invalid frame rate [ %d ] was specified\n\nThe frame rate must be equal to or higher than the frequency
+MSG_VECMAP_NOT_SCREEN	指定されたビットマップ [ %d ] はベクトルマップではない、\n\n或いはスクリーンサイズと一致していません	The specified bitmap [ %d ] is not a vector map,\n\nor does not match the screen size
+MSG_VDMAP_SIZE_MISMATCH	指定されたビットマップ [ %d ] はベクトル＆ディスタンスマップではない、\n\n或いはビットマップ [ %d ] とサイズが一致していません	The specified bitmap [ %d ] is not a vector & distance map,\n\nor its size does not match bitmap [ %d ]
+MSG_BAD_MAP_VIEW_POS	無効なマップ表示座標が指定されました\n\nマップ座標 [ %d , %d ] , チップ座標 [ %d , %d ]	Invalid map display coordinates were specified\n\nMap coordinates [ %d , %d ] , chip coordinates [ %d , %d ]
+MSG_WINDOW_BMPS_UNREGISTERED	指定されたビットマップのうち、いずれかは登録されていません\n\nDecoration [ %d ] , Frame [ %d ] , Back [ %d ]	One of the specified bitmaps is not registered\n\nDecoration [ %d ] , Frame [ %d ] , Back [ %d ]
+MSG_BAD_WINDOW_AREA	ウィンドウの有効範囲として指定された値は無効です\n\n原点座標 [ %d , %d ] , 横幅 [ %d ] , 縦幅 [ %d ]	The values specified as the window's active area are invalid\n\nOrigin [ %d , %d ] , width [ %d ] , height [ %d ]
+MSG_BMP_SCREEN_INCOMPAT	指定されたビットマップ [ %d ] はスクリーンと互換性がありません	The specified bitmap [ %d ] is incompatible with the screen
+MSG_BAD_ICON_COUNT	無効なアイコン数 [ %d ] が指定されました	An invalid icon count [ %d ] was specified
+MSG_BAD_FOCUS_MODE	無効なフォーカスモード [ %d ] が指定されました	An invalid focus mode [ %d ] was specified
+MSG_ICON_BMPS_INVALID	指定されたビットマップの中に無効なものが含まれています	The specified bitmaps include an invalid one
+MSG_OBJ_HAS_OWNER	指定されたオブジェクトにはオーナーが存在します	The specified object has an owner
+MSG_NO_MORE_KNOBS	これ以上、ノブオブジェクトを生成する事は出来ません	No more knob objects can be created
+MSG_BAD_TARGET_HANDLE	無効なターゲットハンドルが指定されました	An invalid target handle was specified
+MSG_VIRTUAL_TARGET	仮想オブジェクトはターゲットに指定できません	A virtual object cannot be specified as the target
+MSG_BAD_KNOB_HANDLE	無効なノブハンドルが指定されました	An invalid knob handle was specified
+MSG_BAD_KNOB_STEP	無効な移動精度 [ %d , %d ] が指定されました	An invalid movement precision [ %d , %d ] was specified
+MSG_BAD_KNOB_RANGE	無効な可動範囲 [ %d , %d ] が指定されました	An invalid movable range [ %d , %d ] was specified
+MSG_NO_MORE_GROUPS	これ以上、グループオブジェクトを生成する事は出来ません	No more group objects can be created
+MSG_BAD_GROUP_HANDLE	無効なグループハンドルが指定されました	An invalid group handle was specified
+MSG_GROUP_SELF	自分自身をグループに登録することはできません	An object cannot be registered in its own group
+MSG_NOT_IN_GROUP	指定されたオブジェクトはグループに登録されていません	The specified object is not registered in the group
+MSG_BAD_MOVIE_SIZE	無効な動画ウィンドウサイズ [ %d, %d ] が指定されました	An invalid movie window size [ %d, %d ] was specified
+MSG_MOVIE_NOT_FOUND	指定された動画ファイル [ %s ] は存在しません	The specified movie file [ %s ] does not exist
+MSG_TARGET_NOT_SPRITE	指定されたハンドルは無効、若しくはスプライトハンドルではありません	The specified handle is invalid or not a sprite handle
+MSG_TARGET_NOT_REGISTERED	指定されたハンドルが示すオブジェクトは登録されていません	The object the specified handle refers to is not registered
+MSG_BAD_TARGET_NO	無効なターゲット番号が指定されました	An invalid target number was specified
+MSG_OBJ_HANDLE_DELETED	オブジェクト制御中にハンドルが削除されました	The handle was deleted while the object was being controlled
+MSG_LOAD_NULL_NAME	ファイル名へのポインタにNULLが指定されています	NULL was specified as the pointer to the file name
+MSG_BMP_NOT_BG	指定されたファイル [ %s : %s ] はBGではない、もしくはサポート外のビットカウントのデータです	The specified file [ %s : %s ] is not a BG, or has an unsupported bit count
+MSG_BMP_NO_MEMORY	何らかの要因によりメモリが確保できません	Memory could not be allocated for some reason
+MSG_BMP_BAD_BITCOUNT2	指定されたBMPファイル [ %s : %s ] はサポート外のビットカウントのデータです	The specified BMP file [ %s : %s ] has an unsupported bit count
+MSG_SE_NOT_BW	指定されたファイル [ %s : %s ] はBWファイルではないようです	The specified file [ %s : %s ] does not seem to be a BW file
+MSG_SE_NOT_MONO	指定されたBWファイル [ %s : %s ] はモノラルではないので効果音として使用できません	The specified BW file [ %s : %s ] is not mono and cannot be used as a sound effect
+MSG_SE_REGISTER_FATAL	指定されたファイル [ %s : %s ] の登録中に致命的なエラーが発生した	A fatal error occurred while registering the specified file [ %s : %s ]
+# ---- "91 xx" handlers
+MSG_VEC_DST_NOT_VECTOR	指定された出力先ビットマップ [ %d ] はベクトルマップではない、\n\n若しくは無効なピクセル数のベクトルマップです	The specified output bitmap [ %d ] is not a vector map,\n\nor is a vector map with an invalid pixel count
+MSG_BAD_STRETCH_RANGE	無効な伸縮範囲 [ %d , %d ] が指定されました	An invalid stretch range [ %d , %d ] was specified
+MSG_BAD_RIPPLE_PERIOD	無効な波紋の周期 [ %d ] が指定されました	An invalid ripple period [ %d ] was specified
+MSG_BAD_BEND_ANGLE	無効な湾曲角度 [ %d ] 、或いは半径 [ %d ] が指定されました	An invalid bend angle [ %d ] or radius [ %d ] was specified
+MSG_BAD_BEND_DEGREE	無効な湾曲度 [ %d ] 、或いは半径 [ %d ] が指定されました	An invalid bend degree [ %d ] or radius [ %d ] was specified
+MSG_XFORM_OUT_INVALID	出力先として指定されたビットマップ [ %d ] は無効です	The bitmap [ %d ] specified as the output is invalid
+MSG_RESAMPLE_DST_INVALID	指定された格納先ビットマップ [ %d ] は無効です	The specified destination bitmap [ %d ] is invalid
+MSG_RESAMPLE_SRC_INVALID	指定された参照元ビットマップ [ %d ] は無効です	The specified source bitmap [ %d ] is invalid
+MSG_RESAMPLE_SRC_NOT_TRUECOLOR	指定された参照元ビットマップ [ %d ] はTRUECOLORではありません	The specified source bitmap [ %d ] is not TRUECOLOR
+MSG_BAD_STRETCH_RATE	無効なストレッチレート [ %d , %d ] は無効です	An invalid stretch rate [ %d , %d ] is invalid
+MSG_BAD_GATHER_RATE	指定された集合度 [ %d ／ %d ] は無効です	The specified gathering rate [ %d / %d ] is invalid
+MSG_BAD_ATTENUATION	指定された輝度減衰量 [ %d ] は無効です	The specified brightness attenuation [ %d ] is invalid
+MSG_TARGET_BMP_INVALID	指定された対象ビットマップ [ %d ] は無効です	The specified target bitmap [ %d ] is invalid
+MSG_SRC_NOT_GRAY	指定された参照元ビットマップ [ %d ] はグレイスケールではありません	The specified source bitmap [ %d ] is not grayscale
+MSG_BG_NOT_MULTILAYER	背景表示モードがマルチレイヤモードではありません	The background display mode is not multi-layer mode
+MSG_BAD_LAYER	指定されたレイヤー [ %d ] は無効です	The specified layer [ %d ] is invalid
+MSG_NO_MORE_EFFECTORS	これ以上、エフェクターオブジェクトを生成する事は出来ません	No more effector objects can be created
+MSG_BAD_EFFECTOR_HANDLE	無効なエフェクターハンドルが指定されました	An invalid effector handle was specified
+MSG_VEC1_NOT_SCREEN	第一ベクトルマップとして指定されたビットマップ [ %d ] はベクトルマップではない、\n\n若しくはスクリーンサイズとピクセル数が一致していません	The bitmap [ %d ] specified as the first vector map is not a vector map,\n\nor its pixel count does not match the screen size
+MSG_VEC2_NOT_SCREEN	第二ベクトルマップとして指定されたビットマップ [ %d ] はベクトルマップではない、\n\n若しくはスクリーンサイズとピクセル数が一致していません	The bitmap [ %d ] specified as the second vector map is not a vector map,\n\nor its pixel count does not match the screen size
+MSG_BAD_GRADIENT_TYPE2	指定されたグラデーションタイプ [ %d ] は無効です	The specified gradient type [ %d ] is invalid
+MSG_VDMAP_NOT_SCREEN2	指定されたビットマップ [ %d ] はベクトル＆ディスタンスマップではない、\n\n或いはスクリーンサイズと一致していません	The specified bitmap [ %d ] is not a vector & distance map,\n\nor does not match the screen size
+MSG_FONT_SIZE_INVALID	指定されたフォントサイズ [ %d ] は無効です	The specified font size [ %d ] is invalid
+MSG_FONT_WIDTH_INVALID	指定されたフォント幅 [ %d ] は無効です	The specified font width [ %d ] is invalid
+MSG_FONT_NO_INVALID	指定されたフォント番号 [ %d ] は無効です	The specified font number [ %d ] is invalid
+MSG_BAD_SPACING_FACTOR	指定された隙間係数 [ %d ] は無効です	The specified spacing factor [ %d ] is invalid
+MSG_BAD_DRAW_STYLE	無効なメッセージ描画スタイル [ %d ] が指定されました	An invalid message drawing style [ %d ] was specified
+MSG_BAD_SWING_STYLE	無効なメッセージスインギングスタイル [ %d ] が指定されました	An invalid message swinging style [ %d ] was specified
+MSG_BAD_RUBY_SIZE_RATE	無効な読み仮名のサイズレート [ %d ] が指定されました	An invalid reading (furigana) size rate [ %d ] was specified
+MSG_BAD_RUBY_MARGIN	無効な読み仮名の為の余白サイズ [ %d ] が指定されました	An invalid margin size for readings (furigana) [ %d ] was specified
+MSG_BAD_KEY_ASSIGNMENT	無効なキーアサインメント [ %d ] が指定されました	An invalid key assignment [ %d ] was specified
+# ---- "92 xx" handlers
+MSG_BAD_RIPPLE_NO	無効な波紋番号 [ %d ] が指定されました	An invalid ripple number [ %d ] was specified
+MSG_VDMAP_DST_NOT_VDMAP	指定された出力先ビットマップ [ %d ] はベクトル＆ディスタンスマップではない、\n\n若しくは無効なピクセル数のベクトル＆ディスタンスマップです	The specified output bitmap [ %d ] is not a vector & distance map,\n\nor is a vector & distance map with an invalid pixel count
+MSG_BAD_RIPPLE_TYPE	無効な波紋タイプ [ %d ] が指定されました	An invalid ripple type [ %d ] was specified
+MSG_BAD_SHAKE_TYPE	無効な振動タイプ [ %d ] が指定されました	An invalid vibration type [ %d ] was specified
+MSG_GRAY_SRC_INVALID	生成元に指定されたビットマップ [ %d ] は無効です	The bitmap [ %d ] specified as the generation source is invalid
+MSG_GRAY_DST_INVALID	格納先に指定されたビットマップ [ %d ] は無効です	The bitmap [ %d ] specified as the destination is invalid
+MSG_BMP_SCREEN_MODE_MISMATCH	指定されたビットマップ [ %d ] とスクリーンのピクセルモードが一致しません	The pixel mode of the specified bitmap [ %d ] does not match the screen's
+# ---- "A0 xx" handlers
+MSG_BW_NOT_FOUND	指定されたBWファイル [ %s ] は存在しません	The specified BW file [ %s ] does not exist
+MSG_NOT_BW	指定されたファイル [ %s ] はBWファイルではないようです	The specified file [ %s ] does not appear to be a BW file
+MSG_BW_ARC_NOT_FOUND	指定されたBWファイル [ %s : %s ] は存在しません	The specified BW file [ %s : %s ] does not exist
+MSG_BW_PAIR_NOT_FOUND	指定されたBWファイル [ %s : %s / %s ] は存在しません	The specified BW file [ %s : %s / %s ] does not exist
+MSG_NOT_BW_PAIR	指定されたファイル [ %s : %s / %s ] はBWファイルではないようです	The specified file [ %s : %s / %s ] does not appear to be a BW file
+# ---- the sound manager
+MSG_SND_PAIR_NOT_FOUND	指定されたファイル [ %s / %s ] は存在しません	The specified file [ %s / %s ] does not exist
+MSG_SND_ARC_PAIR_NOT_FOUND	指定されたファイル [ %s : %s / %s ] は存在しません	The specified file [ %s : %s / %s ] does not exist
+# ---- "B0 xx" handlers
+MSG_BAD_FRAME_RATE_ABOVE_FREQ	無効なフレームレート [ %d ] が指定されました\n\nフレームレートは周波数より高くなければなりません	An invalid frame rate [ %d ] was specified\n\nThe frame rate must be higher than the frequency
+MSG_NO_MORE_CHILDREN	これ以上、チャイルドウィンドウを生成することはできません	No more child windows can be created
+MSG_BAD_CHILD_SIZE	無効なウィンドウサイズ [ %d , %d ] が指定されました	An invalid window size [ %d , %d ] was specified
+MSG_BAD_CHILD_HANDLE2	無効なチャイルドチャイルドウィンドウハンドルが指定されました	An invalid child window handle was specified
+MSG_BAD_CHILD_HANDLE	無効なチャイルドウィンドウハンドルが指定されました	An invalid child window handle was specified
+MSG_CHILD_BMP_MODE	画面モードとビットマップ [ %d ] のピクセルモードには互換性がありません	The screen mode and the pixel mode of bitmap [ %d ] are incompatible
+MSG_CHILD_OUT_OF_CLIENT	指定された出力座標 [ %d , %d ] ではチャイルドウィンドウのクライアント外になります	The specified output coordinates [ %d , %d ] fall outside the child window's client area
+MSG_BAD_EDIT_SIZE	無効なウィンドウサイズ [ %d, %d ] が指定されました	An invalid window size [ %d, %d ] was specified
+MSG_BAD_EDIT_LENGTH	無効な有効文字数 [ %d ] が指定されました	An invalid valid-character count [ %d ] was specified
+MSG_DLG_INPUT_ERROR	入力エラー	Input error
+MSG_DLG_HALFWIDTH	「%s」に半角文字が含まれています	"%s" contains half-width (single-byte) characters
+MSG_DLG_SURNAME	姓	Surname	fixed
+MSG_DLG_GIVEN_NAME	名	Given name	fixed
+MSG_DLG_NICKNAME	ニックネーム	Nickname	fixed
+MSG_DLG_PRONOUN	一人称	First-person pronoun	fixed
+MSG_DLG_COMMENT_INPUT	コメント入力	Comment input	fixed
+MSG_DLG_DATA_INPUT	データ入力	Data input	fixed
+MSG_DLG_STRING1	第一文字列	First string	fixed
+MSG_DLG_STRING2	第二文字列	Second string	fixed
+MSG_EDIT_DEFAULT_TEXT	標準の文字列	Default string	fixed
+MSG_NO_MORE_PTCL_SCREENS	これ以上、パーティクルスクリーンオブジェクトを生成することはできません	No more particle screen objects can be created
+MSG_BAD_FX_SCREEN_SIZE	無効なスクリーンサイズ [ %d , %d ] が指定されました	An invalid screen size [ %d , %d ] was specified
+MSG_BAD_PTCL_HANDLE	無効なパーティクルスクリーンハンドルが指定されました	An invalid particle screen handle was specified
+MSG_BAD_PTCL_SCALE	無効な縮尺 [ %d ] が指定されました	An invalid scale [ %d ] was specified
+MSG_BAD_PTCL_INTERVAL	無効な処理間隔 [ %d ] が指定されました	An invalid processing interval [ %d ] was specified
+MSG_BAD_PATTERN_NO	無効なパターン番号 [ %d ] が指定されました	An invalid pattern number [ %d ] was specified
+MSG_BAD_MAX_OBJECTS	無効な最大オブジェクト数 [ %d ] が指定されました	An invalid maximum object count [ %d ] was specified
+MSG_BMP_NOT_FOR_PARTICLES	指定されたビットマップ [ %d ] はパーティクルには使用できません	The specified bitmap [ %d ] cannot be used for particles
+MSG_NO_MORE_RAIN_SCREENS	これ以上、レインスクリーンオブジェクトを生成することはできません	No more rain screen objects can be created
+MSG_BAD_RAIN_HANDLE	無効なレインスクリーンハンドルが指定されました	An invalid rain screen handle was specified
+MSG_RAIN_MASK_NOT_EXIST	指定されたマスキング用ビットマップ [ %d ] は存在しません	The specified masking bitmap [ %d ] does not exist
+MSG_RAIN_MASK_INVALID	指定されたマスキング用ビットマップ [ %d ] はグレイスケールではない、或いはレインスクリーンとサイズが一致しません	The specified masking bitmap [ %d ] is not grayscale, or its size does not match the rain screen
+MSG_BAD_RAIN_FALL	無効なステージ当たりの落下距離 [ %d ] が指定されました	An invalid fall distance per stage [ %d ] was specified
+MSG_BAD_RAIN_LENGTH	無効な雨の長さ [ %d ] が指定されました	An invalid rain length [ %d ] was specified
+MSG_BAD_RAIN_STAGE_TIME	無効なステージ当たりの時間 [ %d ] が指定されました	An invalid time per stage [ %d ] was specified
+MSG_BAD_RAIN_PROJECTION	無効なプロジェクション値 [ %d ] が指定されました	An invalid projection value [ %d ] was specified
+MSG_MOVIE_NO_AUDIO_DEVICE	オーディオデバイスが利用できません	The audio device is not available
+MSG_MOVIE_VIDEO_NOT_RENDERED	ビデオストリームを再生出来ない、若しくはビデオストリーム再生に必要なレンダラが存在しません	The video stream cannot be played, or the renderer needed to play it is missing
+MSG_MOVIE_AUDIO_NOT_RENDERED	オーディオストリームを再生出来ない、若しくはオーディオストリーム再生に必要なレンダラが存在しません	The audio stream cannot be played, or the renderer needed to play it is missing
+MSG_DLG_PROFILE_TITLE	名前／誕生日を入力して下さい	Please enter the name / birthday (dialog 0x77 caption)	fixed
+MSG_DLG_BIRTHDAY	誕生日	Birthday	fixed
+MSG_DLG_MONTH	月	Month (the suffix after the month number)	fixed
+MSG_DLG_DAY	日	Day (the suffix after the day number)	fixed
+MSG_WAVEMASTER_START_FAILED	WaveMasterの起動に失敗\n\nデバイスへのデータの出力に失敗しました	Failed to start WaveMaster / Failed to output data to the device
+MSG_INST_DLG_FOLDER	インストールフォルダ	Installation folder
+MSG_INST_DLG_BROWSE	参照	Browse
+MSG_INST_DLG_SHORTCUT	ショートカット	Shortcut
+MSG_INST_DLG_SHORTCUT_MENU	プログラムフォルダにショートカットを作成する	Create a shortcut in the Programs folder
+MSG_INST_DLG_SHORTCUT_DESKTOP	デスクトップにショートカットを作成する	Create a shortcut on the desktop
+MSG_INST_DLG_NEXT	次へ	Next
+MSG_INST_DLG_ABORT	中止	Abort
+MSG_INST_DLG_INSTALL	インストール	Install
+MSG_INST_DLG_CONFIG	インストール構成	Installation configuration
+MSG_INST_DLG_MIN	最小	Minimum
+MSG_INST_DLG_STD	標準	Standard
+MSG_INST_DLG_MAX	最大	Maximum
+MSG_INST_DLG_DESC	説明文	Description
+MSG_INST_DLG_BACK	戻る	Back
+MSG_DLG_FONT_FACE	ＭＳ Ｐゴシック	"MS PGothic" in full-width letters: the dialog font of the resource templates	fixed
+MSG_DLG_INPUT2_TITLE	ﾀﾞｲｱﾛｸﾞ	"Dialog" in half-width katakana: the template caption of dialog 0x72 (replaced at run time)	fixed
+MSG_SELECT_FOLDER	フォルダを選択してください	Please select a folder
+MSG_BAD_ADDITION_LEVEL	無効なアディションレベル [ %d ] が指定されました	An invalid addition level [ %d ] was specified
+MSG_GEN_DST_INVALID	生成先に指定されたビットマップ [ %d ] は無効です	The bitmap [ %d ] specified as the generation target is invalid
+MSG_GEN_SRC_INVALID	参照元に指定されたビットマップ [ %d ] は無効です	The bitmap [ %d ] specified as the source is invalid
+MSG_GEN_SRC_MODE_MISMATCH	参照元に指定されたビットマップ [ %d ] 及び [ %d ] のピクセルモードが一致しません	The pixel modes of the source bitmaps [ %d ] and [ %d ] do not match
+MSG_NOT_BG_FILE	指定されたファイル [ %s : %s ] はBGではない、もしくはサポート外の形式のデータです	The specified file [ %s : %s ] is not a BG, or is data of an unsupported format
+MSG_BAD_MASTER_HANDLE	無効なマスターオブジェクトハンドルが指定されました	An invalid master object handle was specified
+MSG_BAD_SLAVE_HANDLE	無効なスレーブオブジェクトハンドルが指定されました	An invalid slave object handle was specified
+MSG_SLAVE_IS_MASTER	指定されたスレーブオブジェクトはマスターオブジェクト自身です	The specified slave object is the master object itself
+MSG_SLAVE_HAS_OWNER	指定されたスレーブオブジェクトにはオーナーが存在します	The specified slave object has an owner
+MSG_SLAVE_NOT_ATTACHED	指定されたスレーブオブジェクトは従属していません	The specified slave object is not attached
+MSG_BAD_FACE_SCALE	無効な倍率 [ 0x%05X , 0x%05X ] が指定されました	An invalid scale [ 0x%05X , 0x%05X ] was specified
+MSG_BAD_FACE_COORDS	無効な座標 [ 0x%05X , 0x%05X ] が指定されました	Invalid coordinates [ 0x%05X , 0x%05X ] were specified
+MSG_BAD_TEXT_FUNC	無効なファンクション番号 [ %d ] が指定されました	An invalid function number [ %d ] was specified
+MSG_BAD_TEXT_FUNC_PARAM	無効なファンクションパラメータ [ %d ] が指定されました	An invalid function parameter [ %d ] was specified
+MSG_BAD_CONTROL_MODE	無効な制御モード [ %d ] が指定されました	An invalid control mode [ %d ] was specified
+MSG_BAD_CHAR_CODE	無効な文字コード [ %d ] が指定されました	An invalid character code [ %d ] was specified
+MSG_BAD_IMAGE_SIZE	無効なイメージサイズ [ %d , %d ] が指定されました	An invalid image size [ %d , %d ] was specified
+MSG_BAD_DRAW_ORDER	無効な描画順序 [ %d ] が指定されました	An invalid drawing order [ %d ] was specified
+MSG_BAD_PTCL_TYPE	無効なパーティクルタイプ [ %d ] が指定されました	An invalid particle type [ %d ] was specified
+MSG_BAD_OBJ_PATTERN	無効なオブジェクトパターン [ %d ] が指定されました	An invalid object pattern [ %d ] was specified
+MSG_BMP_RANGE_NOT_CONFORM	指定されたビットマップ [ %d ～%d ] の中に適合しないものが含まれています	Among the specified bitmaps [ %d to %d ] there is one that does not conform
+MSG_BAD_GETPARAM_ARG	取得対象パラメータ [ 0x%.8X ] に渡された引数 [ %d ( 0x%.8X ) ] に誤りがあります	For the queried parameter [ 0x%.8X ] the argument passed [ %d ( 0x%.8X ) ] is wrong
+# The scenario tool (tools/bgiscn.c, src/scn/): text the game scripts contain, never translated
+MSG_SCN_LABEL_NOT_FOUND	指定されたラベルは見つかりませんでした。	The specified label was not found (the message every scenario's label dispatcher shows)	fixed
+MSG_SCN_PARAM_TEXT_SPEED	テキスト表示速度	text display speed: the first parameter name of the command named set_text_speed	fixed
+MSG_SCN_PARAM_FONT_NUMBER	フォント番号	font number: set_font / set_font_ex	fixed
+MSG_SCN_PARAM_ALIAS_SOURCE	変換元の名前	the name to convert from: set_name_alias	fixed
+MSG_SCN_PARAM_WINDOW_DESIGN	ウィンドウデザイン	window design: set_window_design	fixed
+MSG_SCN_PARAM_WINDOW_MODE	ウィンドウモード	window mode: set_window_mode	fixed
+MSG_SCN_PARAM_BUSTSHOT_NUMBER	バストショット番号	bust shot number: bs_shake / bs_draw	fixed
+MSG_SCN_PARAM_SPRITE_NUMBER	スプライト番号	sprite number: sprite_draw / sprite_move	fixed
+MSG_SCN_PARAM_BG_BITMAP_NAME	背景のビットマップ名	background bitmap name: bg_draw	fixed
+MSG_LAUNCH_TITLE	ゲームの選択	Select game
+MSG_LAUNCH_GAMES	ゲーム:	Games:
+MSG_LAUNCH_DIRECTORY	ディレクトリ:	Directory:
+MSG_LAUNCH_BROWSE	参照...	Browse...
+MSG_LAUNCH_ADVANCED	詳細設定	Advanced
+MSG_LAUNCH_LAUNCH	起動	Launch
+MSG_LAUNCH_QUIT	終了	Quit
+MSG_LAUNCH_PROFILE	プロファイル:	Profile:
+MSG_LAUNCH_OPTIONS	オプション:	Options:
+MSG_LAUNCH_GAME_FOUND	%s（プロファイル %s）	%s (profile %s)
+MSG_LAUNCH_UNKNOWN	不明なゲーム	Unknown game
+MSG_LAUNCH_NO_GAME	ここにゲームはありません（system.arc も ipl._bp もありません）	No game here (no system.arc or ipl._bp)
+MSG_LAUNCH_NO_DIRECTORY	ディレクトリを選択してください	Choose a directory
+MSG_LAUNCH_REFUSED	ゲームのあるディレクトリを選択してください	Select a directory that holds a game first
+MSG_BROWSE_TITLE	フォルダの選択	Select folder
+MSG_BROWSE_OPEN	開く	Open
+MSG_BROWSE_SELECT	選択	Select
+MSG_BROWSE_CANCEL	キャンセル	Cancel
+MSG_BROWSE_UP	上のフォルダへ	Up one level

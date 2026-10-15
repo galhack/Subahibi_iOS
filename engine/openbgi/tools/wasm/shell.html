@@ -1,0 +1,105 @@
+<!doctype html>
+<!--
+  This file is part of OpenBGI (https://openbgi.net).
+  SPDX-License-Identifier: GPL-2.0-only
+
+  shell.html - the page of the WebAssembly build (emcc's shell file)
+
+  `make wasm` turns this into bin/wasm/openbgi.html; tools/wasm/server.js
+  serves it together with the game's files.  The engine draws into the
+  canvas, the page shows its console output and the file cache below.
+
+  Query parameters:
+    ?args=...     the engine's command line (e.g. ?args=--engine=1.58 or ?args=--lang=ja)
+    ?cache=MB     the limit of the in-memory cache of game files (default 512)
+    ?fs=ws://...  another asset server than the page's own host
+-->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>OpenBGI</title>
+	<style>
+		:root { color-scheme: dark; }
+		html, body { margin: 0; background: #111; color: #ccc; font: 13px/1.4 system-ui, sans-serif; }
+		#frame { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px; }
+		#canvas { background: #000; image-rendering: auto; max-width: 100vw; outline: none; }
+		#canvas.fullscreen { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; object-fit: contain; max-width: none; z-index: 10; }
+		#bar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; width: min(100%, 960px); }
+		#bar button { background: #333; color: #ddd; border: 1px solid #555; padding: 3px 10px; cursor: pointer; }
+		#bar button:hover { background: #444; }
+		#status { color: #9c9; }
+		#log { width: min(100%, 960px); height: 160px; background: #000; color: #aaa; border: 1px solid #333; font: 12px/1.3 ui-monospace, monospace; overflow: auto; white-space: pre-wrap; padding: 4px; box-sizing: border-box; }
+		#log .err { color: #e88; }
+	</style>
+</head>
+<body>
+<div id="frame">
+	<canvas id="canvas" width="800" height="600" tabindex="0" oncontextmenu="event.preventDefault()"></canvas>
+	<div id="bar">
+		<span id="status">loading…</span>
+		<span id="cache"></span>
+		<button id="fullscreen" type="button">Full screen</button>
+		<button id="clearlog" type="button">Clear log</button>
+		<span>Click the picture to give it the keyboard (and to start the sound).</span>
+	</div>
+	<div id="log"></div>
+</div>
+<script>
+	var query = new URLSearchParams(location.search);
+	var logEl = document.getElementById('log');
+	var statusEl = document.getElementById('status');
+	var cacheEl = document.getElementById('cache');
+	var canvas = document.getElementById('canvas');
+
+	function log(text, err)
+	{
+		var line = document.createElement('div');
+		if(err)
+			line.className = 'err';
+		line.textContent = text;
+		logEl.appendChild(line);
+		while(logEl.childElementCount > 500)
+			logEl.removeChild(logEl.firstChild);
+		logEl.scrollTop = logEl.scrollHeight;
+	}
+
+	var Module = {
+		canvas: canvas,
+		arguments: (query.get('args') || '').split(/\s+/).filter(function(a) { return a.length > 0; }),
+		bgiCacheLimit: (parseInt(query.get('cache') || '512', 10) || 512) * 1024 * 1024,
+		bgiFsUrl: query.get('fs') || null,
+		print: function(text) { log(text, false); },
+		printErr: function(text) { log(text, true); },
+		setStatus: function(text) { if(text) statusEl.textContent = text; },
+		onRuntimeInitialized: function() { statusEl.textContent = 'running'; },
+		onEngineEnded: function(code) { statusEl.textContent = 'the engine has ended (' + code + ')'; },
+		onCanvasResized: function(w, h, fullscreen) {
+			if(!fullscreen)
+			{
+				canvas.style.width = '';
+				canvas.style.height = '';
+			}
+		},
+		onAbort: function(what) { statusEl.textContent = 'aborted: ' + what; log('aborted: ' + what, true); },
+	};
+
+	document.getElementById('fullscreen').addEventListener('click', function() {
+		if(canvas.requestFullscreen)
+			canvas.requestFullscreen();
+		canvas.focus();
+	});
+	document.getElementById('clearlog').addEventListener('click', function() { logEl.textContent = ''; });
+
+	setInterval(function() {
+		if(!Module['_openbgi_cache_stat'])
+			return;
+		var bytes = Module['_openbgi_cache_stat'](0), blocks = Module['_openbgi_cache_stat'](1), req = Module['_openbgi_cache_stat'](2);
+		cacheEl.textContent = 'cache ' + (bytes / 1048576).toFixed(1) + ' MB in ' + blocks + ' blocks, ' + req + ' requests';
+	}, 1000);
+
+	window.addEventListener('error', function(e) { log('page error: ' + e.message, true); });
+</script>
+{{{ SCRIPT }}}
+</body>
+</html>

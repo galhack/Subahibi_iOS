@@ -31,7 +31,6 @@ targets:
         excludes:
           - "Info.plist"
       - path: ../engine/openbgi/src
-        group: Engine
         compilerFlags: ["-w"]
         excludes:
           - "os/posix/audio.c"
@@ -74,6 +73,7 @@ targets:
         TARGETED_DEVICE_FAMILY[sdk=xr*]: "7"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_APPICON_NAME[sdk=appletv*]: "App Icon & Top Shelf Image"
+        ASSETCATALOG_COMPILER_APPICON_NAME[sdk=xr*]: AppIconVision
         CODE_SIGN_ENTITLEMENTS: ""
         ENABLE_BITCODE: NO
         GCC_OPTIMIZATION_LEVEL[config=Debug]: 2

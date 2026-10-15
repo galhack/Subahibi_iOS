@@ -437,14 +437,18 @@ static int WriteFile(EvbWriter_t* w, const EvbNode_t* n, const char* path)
 	return 0;
 }
 
+#define EVB_MAX_DEPTH 32 // folders nest no deeper (a patch has one level)
+
 // write node *idx (and, for a folder, its children) under dir; advances *idx
-static int WriteNode(EvbWriter_t* w, size_t* idx, const char* dir)
+static int WriteNode(EvbWriter_t* w, size_t* idx, const char* dir, int depth)
 {
 	EvbReader_t* r = w->r;
 	const EvbNode_t* n;
 	char path[2048];
 	if(*idx >= r->count)
 		return Fail(r, "EVB tree ends early");
+	if(depth > EVB_MAX_DEPTH)
+		return Fail(r, "EVB folders nested too deeply");
 	n = &r->nodes[(*idx)++];
 	if(n->name[0])
 		snprintf(path, sizeof path, "%s/%s", dir, n->name);
@@ -457,7 +461,7 @@ static int WriteNode(EvbWriter_t* w, size_t* idx, const char* dir)
 	{
 		uint32_t c;
 		for(c = 0; c < n->children; c++)
-			if(WriteNode(w, idx, path) != 0)
+			if(WriteNode(w, idx, path, depth + 1) != 0)
 				return -1;
 	}
 	return 0;
@@ -523,7 +527,7 @@ int Evb_Extract(const char* exePath, const char* outDir, EvbProgress_t progress,
 		goto done;
 	}
 	for(c = 0; c < rootChildren; c++)
-		if(WriteNode(&w, &idx, outDir) != 0)
+		if(WriteNode(&w, &idx, outDir, 0) != 0)
 			goto done;
 	result = w.files;
 done:

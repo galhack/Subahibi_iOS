@@ -52,7 +52,9 @@ extern int gMoviePlaying; // a movie is running (the window paints black, no sty
 /* play `path` in the (x, y, w, h) rectangle of the window; 1 when
  * playback started (*outLength receives the length in ms), 0 otherwise.
  * A missing audio device or renderer is a script error. */
-int Movie_Play(int32_t* outLength, const char* path, int x, int y, int w, int h);
+int Movie_Play(int32_t* outLength, const char* path, uint32_t offset, uint32_t size, int x, int y, int w, int h);
+// 1.647 on: the archive of the base directory holding the movie `name`, and the entry's offset and size
+int Movie_FindInArchives(const char* name, char* arcPath, uint32_t* offset, uint32_t* size);
 int Movie_Stop(void); // 1 when there was a graph to release
 int Movie_IsPlaying(void);
 int Movie_SetVolume(uint32_t v);   // 0 .. 0x80; 0 for anything above

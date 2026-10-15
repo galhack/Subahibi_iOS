@@ -220,6 +220,11 @@ int OS_PlaySoundFile(const char* path)
 // ---- movies ----------------------------------------------------------------------
 // No movie playback: the open fails, and the rest reports a graph that is not there.
 
+int OS_MovieOpenRange(const char* path, uint32_t offset, uint32_t size)
+{
+	return OS_MOVIE_FAILED;
+}
+
 int OS_MovieOpen(const char* path)
 {
 	return OS_MOVIE_FAILED;

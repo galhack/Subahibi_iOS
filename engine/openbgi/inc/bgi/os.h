@@ -604,6 +604,11 @@ int OS_PlaySoundFile(const char* path);
 #define OS_MOVIE_VIDEO_NOT_RENDERED 3 // VFW_S_VIDEO_NOT_RENDERED
 #define OS_MOVIE_AUDIO_NOT_RENDERED 4 // VFW_S_AUDIO_NOT_RENDERED
 int OS_MovieOpen(const char* path);   // build the graph for the file: one of the codes above (everything is released again on OS_MOVIE_FAILED)
+/* 1.647 on (the original's CAsyncReader over an archive): the same for the
+ * `size` bytes at `offset` of the file at `path` - a movie stored in an
+ * archive.  A back end that cannot read a part of a file returns
+ * OS_MOVIE_FAILED. */
+int OS_MovieOpenRange(const char* path, uint32_t offset, uint32_t size);
 /* show the video as a child at the client rectangle, start it and report
  * its length in ms (the stop position converted to media time); 1 ok */
 int OS_MovieStart(int x, int y, int w, int h, int32_t volume, int32_t* lengthMs);

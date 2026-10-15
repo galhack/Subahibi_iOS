@@ -323,6 +323,14 @@ static void GraphRelease(void)
  * maps RenderFile's: S_OK → OS_MOVIE_OK, the two partial successes and
  * the missing sound card → their OS_MOVIE_* codes with the graph kept,
  * anything else → OS_MOVIE_FAILED with the graph released. */
+int OS_MovieOpenRange(const char* path, uint32_t offset, uint32_t size)
+{
+	(void)path;
+	(void)offset;
+	(void)size;
+	return OS_MOVIE_FAILED; // DirectShow would need the original's async reader filter
+}
+
 int OS_MovieOpen(const char* path)
 {
 	WCHAR wide[WIN32_WPATH];

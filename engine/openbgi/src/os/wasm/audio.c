@@ -258,6 +258,14 @@ int OS_PlaySoundFile(const char* path)
 	return 0;
 }
 
+int OS_MovieOpenRange(const char* path, uint32_t offset, uint32_t size)
+{
+	BGI_UNUSED(path);
+	BGI_UNUSED(offset);
+	BGI_UNUSED(size);
+	return OS_MOVIE_FAILED;
+}
+
 int OS_MovieOpen(const char* path)
 {
 	BGI_UNUSED(path);

@@ -2757,16 +2757,20 @@ static int Opcode_Gfx0_MoviePlay(Thread_t* t) // 90 F0: file, x, y, w, h → len
 	const char* file = (const char*)PopPtr(t);
 	char path[0x104];
 	int32_t length = 0;
+	uint32_t offset = 0, size = 0;
 	if(w <= 0 || h <= 0)
 		GFX_ERROR(t, MSG_BAD_MOVIE_SIZE, w, h);
-	while(!FileExists(NULL, file))
+	// a loose file first; 1.647 on also plays the movies stored in the archives
+	while(!FileExists(NULL, file) &&
+	      !(gEngine->gen >= GEN_1_647 && Movie_FindInArchives(file, path, &offset, &size)))
 	{
 		char msg[0x100];
 		sprintf(msg, MSG_MOVIE_NOT_FOUND, file);
 		RetryPrompt(msg);
 	}
-	FindMoviePath(path, file);
-	Thread_Push(t, Movie_Play(&length, path, x, y, w, h) ? (uint32_t)length : 0u);
+	if(!size)
+		FindMoviePath(path, file);
+	Thread_Push(t, Movie_Play(&length, path, offset, size, x, y, w, h) ? (uint32_t)length : 0u);
 	return 0;
 }
 

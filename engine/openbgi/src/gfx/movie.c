@@ -18,6 +18,7 @@
 #include "bgi/error.h"
 #include "bgi/msg.h"
 #include "bgi/os.h"
+#include "bgi/file.h"
 
 int gMoviePlaying;           // a movie is running: read by the window procedure and the display style toggle
 static int gMovieGraph;      // a graph exists
@@ -37,13 +38,109 @@ int Movie_Stop(void)
 	return had;
 }
 
+/* Compare two Shift-JIS names ignoring the case of single-byte letters (the
+ * archives store names as written, the loader compares them lower-cased);
+ * the trail byte of a double-byte character is compared as it is. */
+static int SjisCaseCmp(const char* a, const char* b)
+{
+	const uint8_t *p = (const uint8_t*)a, *q = (const uint8_t*)b;
+	for(;; p++, q++)
+	{
+		int c = *p, d = *q;
+		if(((c >= 0x81 && c <= 0x9f) || (c >= 0xe0 && c <= 0xfc)) && c == d && p[1])
+		{
+			p++;
+			q++;
+			if(*p != *q)
+				return *p - *q;
+			continue;
+		}
+		if(c >= 'A' && c <= 'Z')
+			c += 'a' - 'A';
+		if(d >= 'A' && d <= 'Z')
+			d += 'a' - 'A';
+		if(c != d || !c)
+			return c - d;
+	}
+}
+
+// the little-endian dword at p
+static uint32_t Le32(const uint8_t* p)
+{
+	return p[0] | p[1] << 8 | p[2] << 16 | (uint32_t)p[3] << 24;
+}
+
+/* Look `name` up in the BURIKO ARC20 archive at `path` (an engine path):
+ * 1 with the absolute offset and the size of the entry when found. */
+static int ArcLocate(const char* path, const char* name, uint32_t* offset, uint32_t* size)
+{
+	OsFile_t* f = OS_FileOpenRead(path);
+	uint8_t hdr[16], e[0x80];
+	uint32_t n, i;
+	int found = 0;
+	if(!f)
+		return 0;
+	if(OS_FileRead(f, hdr, 16) == 16 && memcmp(hdr, "BURIKO ARC20", 12) == 0)
+	{
+		n = Le32(hdr + 12);
+		for(i = 0; i < n && OS_FileRead(f, e, 0x80) == 0x80; i++)
+		{
+			e[0x5f] = 0;
+			if(SjisCaseCmp((const char*)e, name) == 0)
+			{
+				*offset = 16 + n * 0x80 + Le32(e + 0x60);
+				*size = Le32(e + 0x64);
+				found = 1;
+				break;
+			}
+		}
+	}
+	OS_FileClose(f);
+	return found;
+}
+
+/* 1.647 plays the movies of its archives (SubarashikihibiHD keeps op.mpg
+ * in data02101.arc): the archives of the base directory are searched in
+ * name order for the entry.  1 with `arcPath`, offset and size when found. */
+int Movie_FindInArchives(const char* name, char* arcPath, uint32_t* offset, uint32_t* size)
+{
+	char pattern[0x104], best[0x104] = "";
+	OsFindData_t fd;
+	OsFind_t* h;
+	PathJoin(pattern, gBaseDir, "*.arc");
+	h = OS_FindFirst(pattern, &fd);
+	if(!h)
+		return 0;
+	do
+	{
+		char path[0x104];
+		uint32_t off, len;
+		if(fd.attrs & OS_ATTR_DIRECTORY)
+			continue;
+		PathJoin(path, gBaseDir, fd.name);
+		// several archives may hold the name: the first in name order wins, whatever the listing order
+		if((!best[0] || SjisCaseCmp(path, best) < 0) && ArcLocate(path, name, &off, &len))
+		{
+			strcpy(best, path);
+			*offset = off;
+			*size = len;
+		}
+	} while(OS_FindNext(h, &fd));
+	OS_FindClose(h);
+	if(!best[0])
+		return 0;
+	strcpy(arcPath, best);
+	return 1;
+}
+
 /* "90 F0": stop whatever runs, build a graph for `path` and start it in
  * the (x, y, w, h) rectangle of the picture (mapped through the display
- * scaling) at the current volume.  1 when playback started, *outLength
+ * scaling) at the current volume.  A `size` other than 0 plays that many
+ * bytes from `offset` of the file (a movie inside an archive).  1 when playback started, *outLength
  * then holding the length in ms as the player reports it.  A missing
  * audio device or renderer is a script error (thrown; the graph is kept
  * for the next stop); any other failure returns 0. */
-int Movie_Play(int32_t* outLength, const char* path, int x, int y, int w, int h)
+int Movie_Play(int32_t* outLength, const char* path, uint32_t offset, uint32_t size, int x, int y, int w, int h)
 {
 	Bmp_t scaled;
 	Rect_t r, m;
@@ -51,7 +148,7 @@ int Movie_Play(int32_t* outLength, const char* path, int x, int y, int w, int h)
 
 	Movie_Stop();
 	// build the graph with its interfaces and render the file into it (IGraphBuilder::RenderFile)
-	switch(OS_MovieOpen(path))
+	switch(size ? OS_MovieOpenRange(path, offset, size) : OS_MovieOpen(path))
 	{
 		case OS_MOVIE_OK: gMovieGraph = 1; break;
 		case OS_MOVIE_NO_AUDIO_DEVICE:

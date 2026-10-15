@@ -30,7 +30,7 @@ CoreText 字体（日文 SJIS / 中文 GBK+font.ttf 回退）、AudioUnit 拉流
 汉化补丁自动解包（Enigma VFS）、语言选择、遥控器/注视捏合交互、画面适配。
 **Success Criteria**: 四类实机安装运行，能导入数据并游玩。
 **Tests**: 各平台构建通过；实机启动→标题→剧情→存读档（`SUBAHIBI_AUTOSTART` / `SUBAHIBI_SCRIPT` 调试脚本）。
-**Status**: In Progress（四类设备已安装，数据经 devicectl 推送中）
+**Status**: Complete（iPhone 中文、iPad 日文、Vision Pro 日文真机通过；Apple TV 已安装并推送数据，待唤醒后实测）
 
 ## Stage 4: 打磨与验证
 **Goal**: 性能（60fps 呈现、低耗电）、后台/前台切换、存档持久化（tvOS 存储约束）、影片与特效校验。
@@ -41,5 +41,5 @@ CoreText 字体（日文 SJIS / 中文 GBK+font.ttf 回退）、AudioUnit 拉流
 ## Stage 5: 文档与发布
 **Goal**: README.md（安装、数据准备、各设备导入步骤、许可）；推送到 GitHub 私有仓库。
 **Success Criteria**: 仓库不含游戏数据、Claude.md、凭证。
-**Tests**: `git ls-files` 审计。
-**Status**: Not Started
+**Tests**: `git ls-files` 审计（476 文件 / 7 MB，无游戏数据与凭证）。
+**Status**: Complete（私有仓库 galhack/subahibi-apple）

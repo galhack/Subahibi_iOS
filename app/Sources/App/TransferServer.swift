@@ -28,10 +28,13 @@ final class TransferServer: ObservableObject {
 
     private var listener: NWListener?
     private let queue = DispatchQueue(label: "transfer")
+    private static let maxFailedAttempts = 5
+    private var failedAttempts = 0 // on `queue`
 
     func start() {
         guard listener == nil else { return }
         code = String(format: "%06d", Int.random(in: 0..<1_000_000))
+        queue.sync { failedAttempts = 0 }
         do {
             let params = NWParameters.tcp
             params.allowLocalEndpointReuse = true
@@ -61,6 +64,7 @@ final class TransferServer: ObservableObject {
         listener?.cancel()
         listener = nil
         running = false
+        code = ""
     }
 
     /// The device's IPv4 addresses on Wi-Fi / Ethernet, for the launcher to show.
@@ -122,7 +126,17 @@ final class TransferServer: ObservableObject {
             if key == "x-subahibi-code" { given = value }
         }
         let expected = DispatchQueue.main.sync { self.code }
-        guard !expected.isEmpty, given == expected else { return respond(conn, 403, "wrong pairing code") }
+        guard !expected.isEmpty, given == expected else {
+            // a few wrong codes end the session: guessing a 6-digit code is not an option
+            failedAttempts += 1
+            if failedAttempts >= Self.maxFailedAttempts {
+                DispatchQueue.main.async {
+                    self.stop()
+                    self.lastEvent = "配对码错误次数过多，已关闭局域网接收。"
+                }
+            }
+            return respond(conn, 403, "wrong pairing code")
+        }
         guard length >= 0 && length < (4 << 30) else { return respond(conn, 400, "bad length") }
         if method == "GET" && path == "/status" {
             return respond(conn, 200, statusJSON(), type: "application/json")

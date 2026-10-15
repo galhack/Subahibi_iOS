@@ -50,6 +50,8 @@ void Present_SetRate(int fps)
 {
 	if(fps > 0 && 1000u / (uint32_t)fps > 0)
 		gFrameInterval = 1000u / (uint32_t)fps;
+	else if(fps == 0 && gEngine->gen >= GEN_1_647)
+		gFrameInterval = 0; // 1.647 on: present on every pass
 	else
 		gFrameInterval = 1;
 	gNextPresentTime = 0;
@@ -299,7 +301,10 @@ int PresentFrame(void)
 		Present_Dirty();
 	gFrameCount++;
 	gPresentPending = 0;
-	gNextPresentTime += ((now - gNextPresentTime) / gFrameInterval + 1) * gFrameInterval;
+	if(gFrameInterval == 0)
+		gNextPresentTime = now;
+	else
+		gNextPresentTime += ((now - gNextPresentTime) / gFrameInterval + 1) * gFrameInterval;
 	return 0;
 }
 

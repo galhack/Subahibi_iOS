@@ -59,6 +59,7 @@ static const EngineProfile_t kDefaultProfiles[GEN_COUNT] = {
 	{"1.599", GEN_1_599, 172, LAYOUT_D, BOOT_B},
 	{"1.616", GEN_1_616, 172, LAYOUT_D, BOOT_B},
 	{"1.640", GEN_1_640, 172, LAYOUT_D, BOOT_B},
+	{"1.647", GEN_1_647, 172, LAYOUT_D, BOOT_C}, // the 8 MB / 4 MB boot areas of 1.653 already
 	{"1.653", GEN_1_653, 172, LAYOUT_D, BOOT_C},
 	{"1.654", GEN_1_654, 172, LAYOUT_D, BOOT_C},
 	{"1.659", GEN_1_659, 172, LAYOUT_D, BOOT_C},
@@ -179,6 +180,7 @@ static const struct
 	{"UnmeisenjouNoPhi", "1.599", NULL},
 	{"KodomoNoAsobi", "1.616", NULL},
 	{"Tayutama2AS", "1.640", NULL},
+	{"SubarashikihibiHD", "1.647", NULL},
 	{"WakabaironoQuartet", "1.653", NULL},
 	{"NekoTsukuSakura", "1.654", NULL},
 	{"MadoiShirokinoKamikakushi", "1.659", NULL},

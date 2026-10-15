@@ -224,7 +224,8 @@ static int32_t gTextScaleRecip;                                                /
 /* "91 9A": store the parameter of text function `func` (0, or 0x80000000 +
  * n) in gTextFunc.  Each build accepts the numbers it had: none before
  * 1.573, function 0 only up to 1.616, up to 0x80000001 before 1.640, up to
- * 0x80000003 before 1.653, up to 0x80000008 before 1.659, up to 0x80000009
+ * 0x80000003 before 1.647, up to 0x80000005 before 1.653, up to
+ * 0x80000008 before 1.659, up to 0x80000009
  * before 1.669, up to 0x8000000A from then on.  0 ok, 0x80000007 unknown
  * number, 0x80000008 bad parameter.  Function 0x80000001 refuses a negative
  * parameter; 0x80000005 takes only 0 and 1 and silently ignores the rest. */
@@ -238,8 +239,10 @@ uint32_t Text_SetFunction(uint32_t func, int32_t param)
 		count = 1;
 	else if(gen < GEN_1_640)
 		count = 3;
-	else if(gen < GEN_1_653)
+	else if(gen < GEN_1_647)
 		count = 5;
+	else if(gen < GEN_1_653)
+		count = 7; // 1.647: up to 0x80000005
 	else if(gen < GEN_1_659)
 		count = 10;
 	else if(gen < GEN_1_669)

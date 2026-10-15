@@ -97,6 +97,30 @@ static int Opcode_Gfx1_SetSizeLimitSelect(Thread_t* t)
 	return 0;
 }
 
+/* 91 0A (1.640 on): key, value → ok
+ * Two renderer switches selected by a magic key: 0x1220000 and 0x80111600
+ * (anything else is refused with 0x19).  The 1.647 executable stores them
+ * in two globals that its compositing paths test for 1; the boot program
+ * of SubarashikihibiHD turns both on.  Stored only: which blend each one
+ * selects is still to be compared against the original's output. */
+int gGfxSwitch1220000;
+int gGfxSwitch80111600;
+
+static int Opcode_Gfx1_SetRenderSwitch(Thread_t* t)
+{
+	int32_t value = (int32_t)Thread_Pop(t);
+	uint32_t key = Thread_Pop(t);
+	int ok = 1;
+	if(key == 0x1220000u)
+		gGfxSwitch1220000 = value;
+	else if(key == 0x80111600u)
+		gGfxSwitch80111600 = value;
+	else
+		ok = 0;
+	Thread_Push(t, (uint32_t)ok);
+	return 0;
+}
+
 /* 91 0D (1.547 on): on →
  * When set, a variable-pitch face (one EnumFontFamiliesEx reports as
  * such) gets no half-width glyph advance adjustment in that build's glyph
@@ -1338,10 +1362,11 @@ static int Opcode_Gfx1_SetKeyMap(Thread_t* t) // 91 BF: no, actions →
 void Vm_Optable91Init(void)
 {
 	static const OpEntry_t ops[] = {
-		{0x00, Opcode_Gfx1_SetPresentAlways, GEN_1_653, GEN_LAST},
+		{0x00, Opcode_Gfx1_SetPresentAlways, GEN_1_647, GEN_LAST},
 		{0x06, Opcode_Gfx1_SetGlobalOffset, GEN_1_616, GEN_LAST},
 		{0x55, Opcode_Gfx1_SpriteLinkMask, GEN_1_529, GEN_LAST},
-		{0x09, Opcode_Gfx1_SetSizeLimitSelect, GEN_1_653, GEN_LAST},
+		{0x09, Opcode_Gfx1_SetSizeLimitSelect, GEN_1_647, GEN_LAST},
+		{0x0A, Opcode_Gfx1_SetRenderSwitch, GEN_1_640, GEN_LAST},
 		{0x0D, Opcode_Gfx1_SetPropFontAdvance, GEN_1_547, GEN_LAST},
 		{0x0E, Opcode_Gfx1_SetFaceAdjust, GEN_1_529, GEN_LAST},
 		{0x0F, Opcode_Gfx1_FontPreopen, GEN_1_529, GEN_LAST},

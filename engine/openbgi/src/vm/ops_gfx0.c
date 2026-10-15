@@ -76,8 +76,11 @@ static int Opcode_Gfx0_DisplayEnable(Thread_t* t) // 90 01: f →
 static int Opcode_Gfx0_SetFps(Thread_t* t) // 90 02: fps →
 {
 	uint32_t fps = Thread_Pop(t);
-	// 1.58 accepted 0 .. 1000 as a signed value; from 1.64 the rate must be at least 1
-	if(gEngine->gen == GEN_1_58 ? (int)fps < 0 || (int)fps > 1000 : fps < 1 || fps > 1000)
+	/* 1.58 accepted 0 .. 1000 as a signed value; from 1.64 the rate must be
+	 * at least 1; 1.647 takes 0 again, as a zero frame interval (a present
+	 * on every pass of the main loop) */
+	if(gEngine->gen == GEN_1_58 ? (int)fps < 0 || (int)fps > 1000
+	                            : fps > 1000 || (fps < 1 && !(fps == 0 && gEngine->gen >= GEN_1_647)))
 		GFX_ERROR(t, MSG_BAD_FRAME_RATE, (int)fps);
 	Present_SetRate((int)fps);
 	return 0;

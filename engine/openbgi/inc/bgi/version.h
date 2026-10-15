@@ -54,6 +54,7 @@ typedef enum EngineGen
 	GEN_1_599,    // unmei
 	GEN_1_616,    // kodomo
 	GEN_1_640,    // Tayutama2AS
+	GEN_1_647,    // SubarashikihibiHD
 	GEN_1_653,    // WakabaironoQuartet
 	GEN_1_654,    // Nekotsuku
 	GEN_1_659,    // madokino

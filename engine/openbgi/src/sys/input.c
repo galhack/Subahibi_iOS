@@ -115,6 +115,10 @@ int Input_SetSwapButtons(uint32_t v)
  * From 1.529 on nothing is down while the window is inactive, unless
  * "81 14" allows it.
  */
+/* Set by the OS layer while the pointer is hidden because the last input
+ * came from a touch screen (Windows' CURSOR_SUPPRESSED); "B0 06" reports it. */
+int gPointerSuppressed;
+
 int GetKeyStateEx(int vk)
 {
 	int second = 0, r;

@@ -76,6 +76,7 @@ int Knob_Register(uint32_t h);                   // "90 D0": 1 ok, 0 not a knob
 int Knob_Unregister(uint32_t h);                 // "90 D1": 1 if it was registered
 KnobReg_t* Knob_UnderMouse(void);                // the registered knob under the mouse, NULL when none
 void Knob_BeginDrag(KnobReg_t* k, int x, int y); // start a drag at (x, y); NULL ends the drag
+uint32_t Knob_DragHandle(void);                  // "91 DB": the handle of the knob being dragged, 0 when none
 KnobReg_t* Knob_ActiveDrag(void);                // the knob being dragged, NULL when none
 void Knob_MarkChanged(KnobReg_t* k);             // k->changed = 1 (right button, window procedure)
 DispObj_t* Knob_TopCaptured(void);               // the most recently captured knob, NULL when none

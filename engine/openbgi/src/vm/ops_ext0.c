@@ -120,6 +120,17 @@ static int Opcode_Ext0_CursorAutoHide(Thread_t* t) // B0 05: ms →
 	return 0;
 }
 
+/* "B0 06" (1.529 on): → shown
+ * 1 while the mouse pointer is usable, 0 while touch input suppresses it:
+ * the original asks GetCursorInfo for CURSOR_SUPPRESSED (it answers with the
+ * state of the previous call and refreshes it, a difference of one pass
+ * that is not reproduced). */
+static int Opcode_Ext0_PointerShown(Thread_t* t)
+{
+	Thread_Push(t, gPointerSuppressed ? 0u : 1u);
+	return 0;
+}
+
 /* start the screen quake and block the thread on its wait object (scheduler
  * code 2).  StartQuake allocates the wait before validating the parameters;
  * a rejected one is raised as a script error, which does not return, so the
@@ -594,6 +605,7 @@ void Vm_OptableB0Init(void)
 		{0x03, Opcode_Ext0_WindowSetPos, GEN_1_69_472, GEN_LAST},
 		{0x04, Opcode_Ext0_CursorSprite, GEN_FIRST, GEN_LAST},
 		{0x05, Opcode_Ext0_CursorAutoHide, GEN_FIRST, GEN_LAST},
+		{0x06, Opcode_Ext0_PointerShown, GEN_1_529, GEN_LAST},
 		{0x08, Opcode_Ext0_Quake, GEN_FIRST, GEN_LAST},
 		{0x10, Opcode_Ext0_ChildCreate, GEN_FIRST, GEN_LAST},
 		{0x11, Opcode_Ext0_ChildDestroy, GEN_FIRST, GEN_LAST},

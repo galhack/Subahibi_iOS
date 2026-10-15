@@ -121,6 +121,15 @@ static int Opcode_Gfx1_SetRenderSwitch(Thread_t* t)
 	return 0;
 }
 
+/* 91 DB (1.588 on): → handle
+ * The knob the mouse is dragging, 0 when no drag is in progress (the log
+ * window lights its scroll bar while its knob is held). */
+static int Opcode_Gfx1_KnobDragged(Thread_t* t)
+{
+	Thread_Push(t, Knob_DragHandle());
+	return 0;
+}
+
 /* 91 0D (1.547 on): on →
  * When set, a variable-pitch face (one EnumFontFamiliesEx reports as
  * such) gets no half-width glyph advance adjustment in that build's glyph
@@ -1451,6 +1460,7 @@ void Vm_Optable91Init(void)
 		{0xB8, Opcode_Gfx1_SprPanelCreate, GEN_FIRST, GEN_LAST},
 		{0xBA, Opcode_Gfx1_SprPanelStart, GEN_FIRST, GEN_LAST},
 		{0xBF, Opcode_Gfx1_SetKeyMap, GEN_FIRST, GEN_LAST},
+		{0xDB, Opcode_Gfx1_KnobDragged, GEN_1_588, GEN_LAST},
 	};
 	Vm_FillTable(vm_optable_91, OPFAM_91, ops, BGI_COUNTOF(ops));
 }

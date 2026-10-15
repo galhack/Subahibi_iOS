@@ -141,3 +141,18 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def callers(img, target):
+    """Every E8 rel32 call in .text whose destination is target."""
+    import struct as _s
+    lo, hi = img.text_start - img.base, img.text_end - img.base
+    out, i = [], lo
+    while True:
+        i = img.mem.find(b"\xe8", i, hi)
+        if i < 0:
+            return out
+        rel = _s.unpack_from("<i", img.mem, i + 1)[0]
+        if img.base + i + 5 + rel == target:
+            out.append(img.base + i)
+        i += 1

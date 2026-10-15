@@ -24,6 +24,7 @@ struct DispObj; // the display object a mouse layer follows
 
 // ---- raw key state -----------------------------------------------------
 extern int gInputEnable;        // "80 10": the layers report nothing while 0
+extern int gPointerSuppressed;  // set by the OS layer while touch input hides the pointer ("B0 06")
 int GetKeyStateEx(int vk);      // "80 11": bit 15 = down, honours swapped buttons
 int GetKeyTrigger(int vk);      // "80 1D": pending presses, bit 31 = first report while held
 int GetKeyCounter(int vk);      // presses since KeyState_Clear

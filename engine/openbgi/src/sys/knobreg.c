@@ -45,6 +45,12 @@ static KnobCapture_t gCaptureHead; // (its `next` is the list)
 #define gCaptureList (gCaptureHead.next)
 int gKnobGlobal; // "90 DD": the wheel goes to the captured knob instead of the wheel keys
 
+// "91 DB" (1.588 on): the handle of the knob being dragged, 0 when none
+uint32_t Knob_DragHandle(void)
+{
+	return gKnobDrag ? gKnobDrag->handle : 0;
+}
+
 // start (e != NULL) or end a drag; event 0x1000 carries the handle of the knob grabbed
 void Knob_BeginDrag(KnobReg_t* e, int x, int y)
 {

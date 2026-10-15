@@ -369,6 +369,15 @@ static int Opcode_Cos(Thread_t* t) // 49: angle → cos
 	return 0;
 }
 
+// the 16.16 product: the 64-bit product shifted down 16 bits, its low 32 bits kept
+static int Opcode_Fixmul(Thread_t* t) // 56 (1.640 on): a, b → a * b >> 16
+{
+	int32_t b = (int32_t)Thread_Pop(t);
+	int32_t a = (int32_t)Thread_Pop(t);
+	Thread_Push(t, (uint32_t)(((int64_t)a * b) >> 16));
+	return 0;
+}
+
 /* 1.69 build 472 on: atan2(y, x) as an angle in 16.16 degrees, 0 .. 360,
  * measured from the positive x axis towards the positive y axis.  On the
  * y axis (x == 0) the result is 0, 90 or 270 without a computation; the
@@ -1335,6 +1344,7 @@ void Vm_OptableMainInit(void)
 		{0x48, Opcode_Sin, GEN_FIRST, GEN_LAST},
 		{0x49, Opcode_Cos, GEN_FIRST, GEN_LAST},
 		{0x50, Opcode_Add64, GEN_1_69_472, GEN_LAST},
+		{0x56, Opcode_Fixmul, GEN_1_640, GEN_LAST},
 		{0x51, Opcode_Sub64, GEN_1_69_472, GEN_LAST},
 		{0x52, Opcode_Mul64, GEN_1_69_472, GEN_LAST},
 		{0x53, Opcode_Div64, GEN_1_69_472, GEN_LAST},

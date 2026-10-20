@@ -3,6 +3,17 @@
 项目仓库：[galhack/Subahibi_iOS](https://github.com/galhack/Subahibi_iOS)。
 安装包：[Releases](https://github.com/galhack/Subahibi_iOS/releases)。
 
+### 0.1.2 稳定性更新
+
+修复存档 5 后推进剧情遇到 BF_Movie 动画时引擎停止的问题：纠正动画加载指令
+的文件名、封包名参数顺序，并补充 `0x10000` / `0x10001` 压缩动画的逐帧解码，
+包括差分画面和透明度。另修复 BMP 文件头的非对齐读取和模糊效果的有符号移位。
+本次更新保留 0.1.1 的超大图片加载修复。
+
+验证（2026-10-20）：14 个引擎测试程序通过 ASan / UBSan 检查，实际动画的 8 帧
+全部解码成功；iPhone 16 Pro Max 从存档 5 推进，已越过原故障点并进入后续剧情。
+四个平台均构建成功。本次未在 iPad、Apple TV、Vision Pro 实机上复测，也未全流程通关。
+
 ### 0.1.1 稳定性更新
 
 修复推进剧情时加载超大图片导致的崩溃：旧版使用固定 32 MiB 缓冲区，

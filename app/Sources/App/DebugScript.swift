@@ -9,7 +9,8 @@ import UniformTypeIdentifiers
 ///   SUBAHIBI_AUTOSTART=ja|zh   skip the launcher and start in that language
 ///   SUBAHIBI_SCRIPT="..."      input once the engine runs, the words of
 ///                              tools/apple/hosttest.c: wait S, move X Y,
-///                              click X Y, rclick X Y, key VK, wheel D, shot NAME
+///                              click X Y, rclick X Y, key VK, keydown VK,
+///                              keyup VK, wheel D, shot NAME
 ///
 /// "shot NAME" writes the picture to Documents/Debug/NAME.png (Caches on tvOS).
 /// Nothing here runs in a normal launch.
@@ -69,6 +70,8 @@ enum DebugScript {
                 AppleHost_Key(vk, 1)
                 Thread.sleep(forTimeInterval: 0.06)
                 AppleHost_Key(vk, 0)
+            case "keydown", "keyup":
+                AppleHost_Key(int(), word == "keydown" ? 1 : 0)
             case "wheel":
                 AppleHost_Wheel(int())
             case "shot":

@@ -23,6 +23,7 @@
 extern int gLauncherMode; // "Execute as a launcher.": no sound device is opened
 extern int gNoMutex;      // "Do not use mutex.": no single-instance mutex
 extern int gBootDefault;  // no boot path was given: the game directory is where the engine runs
+extern int gSkipMakerLogo; // --skip-maker-logo: omit only the optional MakerLogo title prelude
 extern int gDiscMarker;   // --disc-marker: the disc marker file (a file named like the product) is reported to the scripts
 
 // process state

@@ -589,7 +589,12 @@ static int Opcode_Sys_FileExists(Thread_t* t) // 80 34: arc, name → f
 {
 	const char* name = (const char*)PopPtr(t);
 	const char* arc = (const char*)PopPtr(t);
-	Thread_Push(t, IsDiscMarker(arc, name) ? 0u : (uint32_t)FileExists(arc, name));
+	/* Subahibi HD's title checks this optional scenario before running its
+	 * logos and warnings.  Use that existing branch so boot initialization
+	 * and the title itself still execute normally; never hide story assets. */
+	int omitPrelude = gSkipMakerLogo && arc && name &&
+		strcmp(arc, "data01xxx.arc") == 0 && strcmp(name, "MakerLogo") == 0;
+	Thread_Push(t, omitPrelude || IsDiscMarker(arc, name) ? 0u : (uint32_t)FileExists(arc, name));
 	return 0;
 }
 

@@ -87,5 +87,23 @@ The other physical devices were unavailable for this revision's testing.
 - On devices: `SUBAHIBI_AUTOSTART=ja|zh` and `SUBAHIBI_SCRIPT="..."` (see
   `app/Sources/App/DebugScript.swift`).  Script input bypasses the gesture
   recognizers: test real touches as well.
-- The title menu exists only about 28 s after boot (after the five intro
-  clicks of the scripts); a click before that does nothing.
+- Apple builds enable `--skip-maker-logo` from 0.1.3. The optional prelude
+  lookup returns absent, so the original title script enters its normal menu
+  without introductory pictures. Startup tests must wait for menu readiness.
+
+### 0.1.3 global progress and startup
+
+`GdbPath` returned an unqualified `BGI.gdb` when no alternate directory was
+set. Reads therefore missed Apple's drive-rooted save redirection, while
+`WriteTextFile` qualified writes with `gBaseDir`. Both operations now use the
+same qualified path. `test_database` puts conflicting original and player
+records in separate locations and checks chapter flags, system state, names
+and read flags after reload. `test_startup` checks that only the exact optional
+MakerLogo lookup is hidden and that direct asset access remains available.
+
+The original Kimika ending records completion flag 214; the main ending sets
+chapter flag 232. These conditions are unchanged. Chapter selection uses
+transparent normal images and visible hover images; private fixture testing
+confirmed highlighting and entry into a chapter. Lost flags from an already
+overwritten database cannot be reconstructed from the chapter-local manual
+saves. No synthetic unlock flags are installed on user devices.

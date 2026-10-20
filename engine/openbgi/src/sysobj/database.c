@@ -49,11 +49,13 @@ typedef struct GdbFlagRec // one flag-group record of the file
 
 /* Where the database lives: next to the game until 1.69 build 444; from
  * build 451 on in the directory "80 39" set (gAltDir), which is the user's
- * data folder in those games. */
+ * data folder in those games). If no alternative directory was selected,
+ * qualify the name with the base directory, just as WriteTextFile does.
+ * This also makes reads honor the Apple host's save-path redirection. */
 static void GdbPath(char* out)
 {
 	if(gEngine->gen >= GEN_1_69_451)
-		sprintf(out, "%s%s", gAltDir, GDB_FILE);
+		sprintf(out, "%s%s", gAltDir[0] ? gAltDir : gBaseDir, GDB_FILE);
 	else
 		strcpy(out, GDB_FILE);
 }

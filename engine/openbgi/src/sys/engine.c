@@ -35,6 +35,7 @@
 
 int gLauncherMode;                       // "Execute as a launcher.": no sound, no saved window position
 int gNoMutex;                            // "Do not use mutex.": several instances may run
+int gSkipMakerLogo;                      // --skip-maker-logo: omit the optional title prelude
 int gDiscMarker;                         // --disc-marker: "80 34" reports the disc marker file
 int gBootDefault;                        // no boot path on the command line: the game directory is where the engine runs
 int gEngineUp;                           // between Engine_Init's success and Engine_Shutdown
@@ -273,6 +274,7 @@ void Engine_Shutdown(void)
 //   --debug            open the debugger (docs/debugger.md) with the game;
 //                      --debug=pause holds the threads until F5 (F12 in the
 //                      game's window opens and closes it at any time)
+//   --skip-maker-logo  omit Subahibi HD's optional MakerLogo title prelude
 //   --disc-marker      let the scripts see the disc marker file - the file
 //                      named after the product that the discs carry; every
 //                      boot program quits at once when it finds one next to
@@ -332,6 +334,8 @@ static void Engine_ParseOptions(char* cmd)
 			gOptListMissing = 1;
 		else if(strcmp(start, "--debug") == 0 || strcmp(start, "--debug=pause") == 0)
 			gOptDebug = start[7] ? 2 : 1;
+		else if(strcmp(start, "--skip-maker-logo") == 0)
+			gSkipMakerLogo = 1;
 		else if(strcmp(start, "--disc-marker") == 0)
 			gDiscMarker = 1;
 		else if(strncmp(start, "--list=", 7) == 0)

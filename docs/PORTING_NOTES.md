@@ -125,3 +125,18 @@ its focus image as its normal image. Enable flags, masks and decisions remain
 the script's. `test_chaptermenu` covers the available/locked distinction,
 unchanged source tables and other modules. Debug scripts accept `touch 1`
 to test with the pointer suppression state of a finger tap.
+
+### 0.1.5 Jabberwocky II mosaic-transition ABI
+
+Slot 8 in the reported progress is scenario `6-3`. A private save replay
+stopped at `scrgrp2._bp + 0x18f1`, instruction `90 4A`, with an invalid-link
+script error. The script supplies front, back, style, level, link; the VM
+handler read the final two values in reverse, treating level 256 as a link.
+The handler now pops link before level and retains the graphics manager's
+internal argument order. No game scripts or graphics were changed.
+
+`test_bgflip` calls the actual opcode with synthetic screen-sized bitmaps,
+checks level/link separately, and renders the transition endpoints. It failed
+before the fix and passes afterward. A traced replay from the device's save
+now returns success at the original instruction and advances through later
+scenarios under ASan/UBSan. Device reports and save fixtures remain private.

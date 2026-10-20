@@ -1223,10 +1223,10 @@ static int Opcode_Gfx0_BgZoom(Thread_t* t) // 90 49: bmp, scale, option →
 /* type 11: the mosaic transition from `front` to `back` (a bitmap, black or
  * white) at `level`; `style` must be 0, `link` 0 or 1 (1 also mosaics the
  * back bitmap, by 0x100 - level) */
-static int Opcode_Gfx0_BgFlip(Thread_t* t) // 90 4A: front, back, style, link, level →
+static int Opcode_Gfx0_BgFlip(Thread_t* t) // 90 4A: front, back, style, level, link →
 {
-	int level = (int)Thread_Pop(t);
 	int link = (int)Thread_Pop(t);
+	int level = (int)Thread_Pop(t);
 	int style = (int)Thread_Pop(t);
 	int back = (int)Thread_Pop(t);
 	int front = (int)Thread_Pop(t);

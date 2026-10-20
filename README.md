@@ -3,6 +3,18 @@
 项目仓库：[galhack/Subahibi_iOS](https://github.com/galhack/Subahibi_iOS)。
 安装包：[Releases](https://github.com/galhack/Subahibi_iOS/releases)。
 
+### 0.1.5 Jabberwocky II 转场退出修复
+
+修复 Jabberwocky II 从第 8 槽推进不久后的转场报错退出：背景马赛克转场指令
+`90 4A` 的强度与链接开关参数读取顺序颠倒，将强度 `256` 当作只能为 `0/1` 的开关，
+触发引擎错误并结束游戏。现在按脚本原有顺序读取参数，保留正常转场效果。
+
+验证（2026-10-20）：新增指令回归测试在修复前失败、修复后通过，包含链接开关、
+不同强度和转场端点画面检查；全部 18 个引擎测试程序通过 ASan / UBSan。
+使用第 8 槽副本及 iPhone 16 Pro Max 实机均通过原故障点并推进到后续剧情，
+8 个手动存档与更新前逐字节一致。四个平台构建成功；
+本次未在 iPad、Apple TV、Vision Pro 实机复测，也未全流程通关。
+
 ### 0.1.4 START 章节选择修复
 
 修复已有结局记录、但 START 后仍没有可选章节的情况。旧版可能已经丢失章节入口标记，

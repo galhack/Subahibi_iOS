@@ -42,6 +42,7 @@ typedef struct AppleHostConfig
 	const char* fontFile;   // a font file to register before the start (the patch's font.ttf), NULL for none
 	int chinese;            // the script text is GBK (the Chinese patch) rather than Shift-JIS
 	const char* engineArgs; // extra command-line options for Engine_Main ("--engine=1.647"), NULL for none
+	const char* supplementDir; // validated optional afterstory delta, NULL for none
 } AppleHostConfig_t;
 
 /* Start the engine on its own thread with the game of `cfg` (the strings are

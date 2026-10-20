@@ -22,6 +22,8 @@ import urllib.parse
 
 PORT = 8765
 WANTED_EXACT = {"bgi-chs.exe", "font.ttf", "bgi.gdb", "bgi.hvl"}
+PATCH_DIR = "AfterstoryCHS"
+PATCH_FILES = {"extra", "8_af", "8-1_extra_01-1", "8-1_extra_01-2", "afterstory-font.ttf", "Readme.txt", "patch.json"}
 
 
 def is_archive(path):
@@ -29,9 +31,9 @@ def is_archive(path):
         return f.read(12) == b"BURIKO ARC20"
 
 
-def wanted(folder):
+def wanted(folder, patch_only=False):
     files = []
-    for name in sorted(os.listdir(folder)):
+    for name in ([] if patch_only else sorted(os.listdir(folder))):
         path = os.path.join(folder, name)
         if not os.path.isfile(path) or name.startswith("."):
             continue
@@ -40,6 +42,13 @@ def wanted(folder):
             files.append(name)
         elif lower in WANTED_EXACT:
             files.append(name)
+    patch = os.path.join(folder, PATCH_DIR)
+    if os.path.isdir(patch):
+        # Send the manifest last; the app refuses incomplete payloads.
+        files.extend(f"{PATCH_DIR}/{name}" for name in sorted(PATCH_FILES - {"patch.json"})
+                     if os.path.isfile(os.path.join(patch, name)))
+        if os.path.isfile(os.path.join(patch, "patch.json")):
+            files.append(f"{PATCH_DIR}/patch.json")
     return files
 
 
@@ -84,12 +93,17 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--host", required=True, help="the address the app shows")
     ap.add_argument("--code", required=True, help="the pairing code the app shows")
+    ap.add_argument("--patch-only", action="store_true", help="send only the AfterstoryCHS folder (folder is its parent)")
+    ap.add_argument("--force", action="store_true", help="resend even when sizes match")
     ap.add_argument("folder", help="your game folder (the one holding sysprg.arc)")
     args = ap.parse_args()
-    if not os.path.exists(os.path.join(args.folder, "sysprg.arc")):
+    if not args.patch_only and not os.path.exists(os.path.join(args.folder, "sysprg.arc")):
         sys.exit("this folder has no sysprg.arc: point at the game folder itself")
+    if args.patch_only and not os.path.isfile(os.path.join(args.folder, PATCH_DIR, "patch.json")):
+        sys.exit("this folder has no AfterstoryCHS/patch.json: unzip the patch and point at its parent")
     have = device_files(args.host, args.code)
-    todo = [n for n in wanted(args.folder) if have.get(n) != os.path.getsize(os.path.join(args.folder, n))]
+    todo = [n for n in wanted(args.folder, args.patch_only)
+            if args.force or args.patch_only or have.get(n) != os.path.getsize(os.path.join(args.folder, n))]
     total = sum(os.path.getsize(os.path.join(args.folder, n)) for n in todo)
     print(f"{len(todo)} files, {total / 1e9:.2f} GB to send ({len(have)} already on the device)")
     for name in todo:

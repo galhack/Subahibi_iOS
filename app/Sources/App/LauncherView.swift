@@ -54,6 +54,9 @@ struct LauncherView: View {
                         Label(model.overlayReady ? "汉化补丁已就绪" : "检测到汉化补丁（首次启动时自动解包）",
                               systemImage: "character.book.closed")
                     }
+                    if model.hasAfterstoryPatch {
+                        Label("检测到后日谈增量汉化（启动时校验）", systemImage: "text.badge.checkmark")
+                    }
                 } else {
                     Label("尚未找到游戏文件", systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                     Text("请把你自己购买的游戏目录（含 sysprg.arc、data*.arc 等文件）放到本应用中。")

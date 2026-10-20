@@ -16,6 +16,7 @@ final class AppModel: ObservableObject {
     @Published var gameFolder: URL?
     @Published var hasChinesePatch = false
     @Published var overlayReady = false
+    @Published var hasAfterstoryPatch = false
     @Published var progress: Double = 0
     @Published var errorMessage: String?
     @AppStorage("language") var languageRaw: String = GameLanguage.chinese.rawValue
@@ -60,6 +61,9 @@ final class AppModel: ObservableObject {
     /// Look for the game files and the patch again (after a copy or a transfer).
     func refresh() {
         gameFolder = GamePaths.findGameFolder()
+        hasAfterstoryPatch = gameFolder.map {
+            FileManager.default.fileExists(atPath: $0.appendingPathComponent(AfterstoryPatch.directoryName).path)
+        } ?? false
         if let folder = gameFolder {
             hasChinesePatch = GamePaths.fileExists(named: "BGI-CHS.exe", in: folder) || overlayIsCurrent(for: folder)
             overlayReady = overlayIsCurrent(for: folder)
@@ -101,11 +105,19 @@ final class AppModel: ObservableObject {
 
     private func launch(folder: URL) {
         let overlay = language == .chinese ? GamePaths.chineseOverlay : nil
+        let afterstory: AfterstoryPatch?
+        do {
+            afterstory = try overlay.flatMap { try AfterstoryPatch.load(gameFolder: folder, baseOverlay: $0) }
+        } catch {
+            errorMessage = error.localizedDescription
+            phase = .launcher
+            return
+        }
         EngineBridge.onEnd = { [weak self] code in
             self?.phase = .ended(code)
         }
         transfer.stop()
-        if EngineBridge.start(gameFolder: folder, language: language, overlay: overlay) {
+        if EngineBridge.start(gameFolder: folder, language: language, overlay: overlay, afterstory: afterstory) {
             phase = .playing
             DebugScript.runIfRequested()
         } else {

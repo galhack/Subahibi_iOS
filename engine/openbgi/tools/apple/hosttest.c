@@ -15,6 +15,7 @@
  *                        key VK | keydown VK | keyup VK | wheel D | shot FILE
  *     --shot=FILE        the last picture, written when the time is up
  *     --overlay=DIR      loose files shadowing the game (a translation patch)
+ *     --supplement=DIR   the four optional afterstory resources, above --overlay
  *     --font=FILE        a font file to register (the patch's font.ttf)
  *     --save=DIR         the save directory (UserData, BGI.gdb)
  *     --chinese          the script text is GBK
@@ -238,6 +239,7 @@ int main(int argc, char** argv)
 	memset(&cfg, 0, sizeof cfg);
 	cfg.gameDir = argv[1];
 	cfg.overlayDir = Opt(argc, argv, "--overlay");
+	cfg.supplementDir = Opt(argc, argv, "--supplement");
 	cfg.fontFile = Opt(argc, argv, "--font");
 	cfg.saveDir = Opt(argc, argv, "--save");
 	cfg.chinese = Opt(argc, argv, "--chinese") != NULL;

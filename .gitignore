@@ -6,6 +6,8 @@ BGI*.exe
 BGI.gdb
 BGI.hvl
 font.ttf
+AfterstoryCHS/
+*AfterstoryCHS*.zip
 UserData/
 
 # Private notes and credentials

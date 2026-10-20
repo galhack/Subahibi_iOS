@@ -35,6 +35,7 @@ char gAppleSaveDir[1024];
 int gAppleChinese;
 
 static char gFontFile[1024];
+static char gSupplementDir[1024];
 static char gEngineArgs[512];
 static pthread_t gThread;
 static volatile int gRunning;
@@ -128,6 +129,8 @@ static int Redirect(const char* rel, char* out, size_t n)
 		snprintf(out, n, "%s%s", gAppleSaveDir, rel);
 		return 1;
 	}
+	if(AppleOverlay_FindSupplement(gSupplementDir, rel, out, n))
+		return 1;
 	if(gOverlayCount && !strchr(rel, '/'))
 	{
 		const char* hit = OverlayFind(rel);
@@ -215,6 +218,7 @@ int AppleHost_Start(const AppleHostConfig_t* cfg)
 	SetDir(gAppleGameDir, sizeof gAppleGameDir, cfg->gameDir);
 	SetDir(gAppleOverlayDir, sizeof gAppleOverlayDir, cfg->overlayDir);
 	SetDir(gAppleSaveDir, sizeof gAppleSaveDir, cfg->saveDir);
+	SetDir(gSupplementDir, sizeof gSupplementDir, cfg->supplementDir);
 	snprintf(gFontFile, sizeof gFontFile, "%s", cfg->fontFile ? cfg->fontFile : "");
 	snprintf(gEngineArgs, sizeof gEngineArgs, "%s", cfg->engineArgs ? cfg->engineArgs : "");
 	gAppleChinese = cfg->chinese != 0;

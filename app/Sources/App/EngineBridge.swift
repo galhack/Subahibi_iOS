@@ -15,7 +15,7 @@ enum EngineBridge {
     /// installed by the game screen, called on the main thread.
     static var presentMessageBox: ((String, String, UInt32, @escaping (Int32) -> Void) -> Void)?
 
-    static func start(gameFolder: URL, language: GameLanguage, overlay: URL?) -> Bool {
+    static func start(gameFolder: URL, language: GameLanguage, overlay: URL?, afterstory: AfterstoryPatch?) -> Bool {
         AppleHost_SetEndHandler { code in
             DispatchQueue.main.async { EngineBridge.onEnd?(code) }
         }
@@ -25,16 +25,18 @@ enum EngineBridge {
                                          flags: flags)
         }
         let saves = GamePaths.saves(for: language)
-        let font = language == .chinese ? GamePaths.file(named: "font.ttf", in: gameFolder) : nil
+        let font = language == .chinese ? (afterstory?.font ?? GamePaths.file(named: "font.ttf", in: gameFolder)) : nil
         return gameFolder.path.withCString { game in
             saves.path.withCString { save in
                 withOptionalCString(overlay?.path) { over in
                     withOptionalCString(font?.path) { fontPath in
                         "--engine=1.647 --skip-maker-logo --repair-subahibi-progress --subahibi-chapter-menu".withCString { args in
-                            var cfg = AppleHostConfig_t(gameDir: game, overlayDir: over, saveDir: save,
-                                                        fontFile: fontPath, chinese: language == .chinese ? 1 : 0,
-                                                        engineArgs: args)
-                            return AppleHost_Start(&cfg) == 1
+                            withOptionalCString(afterstory?.directory.path) { supplement in
+                                var cfg = AppleHostConfig_t(gameDir: game, overlayDir: over, saveDir: save,
+                                                            fontFile: fontPath, chinese: language == .chinese ? 1 : 0,
+                                                            engineArgs: args, supplementDir: supplement)
+                                return AppleHost_Start(&cfg) == 1
+                            }
                         }
                     }
                 }

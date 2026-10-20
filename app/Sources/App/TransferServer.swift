@@ -187,6 +187,7 @@ final class TransferServer: ObservableObject {
     static let allowedExtensions: Set<String> = ["arc", "exe", "ttf", "gdb", "hvl", "txt", "lst"]
 
     static func isSafe(_ name: String) -> Bool {
+        if AfterstoryPatch.isTransferPath(name) { return true }
         guard !name.isEmpty, name.count < 200, !name.hasPrefix("."),
               name.unicodeScalars.allSatisfy({ $0.value >= 0x20 && $0 != "/" && $0 != "\\" && $0 != ":" }) else { return false }
         let ext = (name as NSString).pathExtension.lowercased()
@@ -196,7 +197,11 @@ final class TransferServer: ObservableObject {
     private func receiveFile(_ conn: NWConnection, name: String, length: Int64, initialBody: Data) {
         let target = GamePaths.transferTarget
         let final = target.appendingPathComponent(name)
-        let partial = target.appendingPathComponent(".\(name).part")
+        let parent = final.deletingLastPathComponent()
+        do {
+            try FileManager.default.createDirectory(at: parent, withIntermediateDirectories: true)
+        } catch { return respond(conn, 500, "cannot create folder") }
+        let partial = parent.appendingPathComponent(".\(final.lastPathComponent).part")
         FileManager.default.createFile(atPath: partial.path, contents: nil)
         guard let handle = try? FileHandle(forWritingTo: partial) else {
             return respond(conn, 500, "cannot write")
@@ -244,8 +249,10 @@ final class TransferServer: ObservableObject {
 
     private func statusJSON() -> String {
         let target = GamePaths.transferTarget
-        let names = ((try? FileManager.default.contentsOfDirectory(atPath: target.path)) ?? [])
+        var names = ((try? FileManager.default.contentsOfDirectory(atPath: target.path)) ?? [])
             .filter { !$0.hasPrefix(".") }.sorted()
+        names += AfterstoryPatch.transferNames.sorted().map { "\(AfterstoryPatch.directoryName)/\($0)" }
+            .filter { FileManager.default.fileExists(atPath: target.appendingPathComponent($0).path) }
         let files = names.map { name -> [String: Any] in
             let size = (try? FileManager.default.attributesOfItem(atPath: target.appendingPathComponent(name).path)[.size]
                 as? NSNumber)?.int64Value ?? 0

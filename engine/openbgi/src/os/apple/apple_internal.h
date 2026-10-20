@@ -31,6 +31,7 @@ extern char gAppleSaveDir[1024];    // "" for none, else with a trailing '/'
 extern int gAppleChinese;           // the script text is GBK (font.c decodes it so)
 // the application's answer to a message box (OS_IDOK, ...); -1 when it installed no handler
 int AppleHost_AskMessageBox(const char* text, const char* caption, uint32_t flags);
+int AppleOverlay_FindSupplement(const char* folder, const char* name, char* out, size_t n);
 
 // ---- window.c: the event queue of the main window ----------------------------------------------
 enum

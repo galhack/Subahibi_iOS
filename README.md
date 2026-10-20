@@ -1,7 +1,7 @@
 # 美好的每一天 ～不连续存在～ · Apple 平台移植
 
-项目仓库：[galhack/Subarashiki_iOS](https://github.com/galhack/Subarashiki_iOS)。
-安装包：[Releases](https://github.com/galhack/Subarashiki_iOS/releases)。
+项目仓库：[galhack/Subahibi_iOS](https://github.com/galhack/Subahibi_iOS)。
+安装包：[Releases](https://github.com/galhack/Subahibi_iOS/releases)。
 
 ### 0.1.1 稳定性更新
 
@@ -61,8 +61,8 @@ ASan / UBSan 检查。iOS/iPadOS、tvOS、visionOS、Mac Catalyst 均构建成�
 ### 1. 生成 Xcode 工程
 
 ```sh
-git clone https://github.com/galhack/Subarashiki_iOS.git
-cd Subarashiki_iOS
+git clone https://github.com/galhack/Subahibi_iOS.git
+cd Subahibi_iOS
 SUBAHIBI_TEAM=<你的 Team ID> tools/apple/gen_project.sh
 open app/Subahibi.xcodeproj
 ```

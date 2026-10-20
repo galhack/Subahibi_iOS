@@ -503,6 +503,141 @@ static void TestMovie(int bpp)
 	TestWaits(file, o, pix1, bpp);
 }
 
+/* A hand-coded streamed movie, independent of the type-0 encoder above.
+ * DC alphabet {0,8}: bits 0/1; AC alphabet {0}: bit 0. The second frame
+ * replaces only the right 8x8 block, preserving left RGB and alpha. */
+static size_t StreamFrame(uint8_t* out, int delta, uint32_t type)
+{
+	size_t n = 0, table, row, alpha;
+	uint32_t offsets[2];
+	int i;
+	for(i = 0; i < 16; i++)
+		n += PutVarint(out + n, i == 0 || i == 8 ? 1 : 0);
+	for(i = 0; i < 176; i++)
+		n += PutVarint(out + n, i == 0 ? 1 : 0);
+	table = n;
+	n += 8;
+	row = n;
+	out[n++] = delta ? 2 : 3;
+	n += PutVarint(out + n, delta ? 192 : 384);
+	if(delta)
+	{
+		/* +128, -128, 0 DC differences, MSB first; then byte-aligned AC. */
+		out[n++] = 0xc0;
+		out[n++] = 0x5f;
+		out[n++] = 0xc0;
+	}
+	else
+		out[n++] = 0; // six zero DC differences
+	out[n++] = 0;     // zero AC for every coded block
+	alpha = n;
+	if(type == 0x10001)
+	{
+		uint32_t kind = delta ? 2 : 1;
+		memcpy(out + n, &kind, 4);
+		n += 4;
+	}
+	if(delta && type == 0x10001)
+	{
+		uint32_t unpacked = 65; // one mask byte, then 64 alpha samples
+		memcpy(out + n, &unpacked, 4);
+		n += 4;
+		for(i = 0; i < 256; i++)
+			n += PutVarint(out + n, i == 2 ? 1 : (i == 77 ? 64 : 0));
+		out[n++] = 0x7f; // mask symbol 2 (0), then seven samples 77 (1)
+		for(i = 0; i < 7; i++)
+			out[n++] = 0xff;
+		out[n++] = 0x80;
+	}
+	else
+		for(i = 0; i < 16; i++)
+		{
+			out[n++] = 0; // eight literal alpha samples
+			memset(out + n, 42, 8);
+			n += 8;
+		}
+	offsets[0] = (uint32_t)row;
+	offsets[1] = (uint32_t)alpha;
+	memcpy(out + table, offsets, sizeof offsets);
+	return n;
+}
+
+static void TestStreamMovie(void)
+{
+	uint8_t file[4096] = {0}, decoded[16 * 8 * 4], expected[sizeof decoded];
+	BfMovieHeader_t* h = (BfMovieHeader_t*)file;
+	uint32_t offsets[2], saved;
+	size_t size = 0xc8;
+	int i;
+	printf("streamed movie sparse RGB and alpha\n");
+	memcpy(h->magic, BFMOVIE_MAGIC, 16);
+	h->type = 0x10001;
+	h->width = 16;
+	h->height = 8;
+	h->bpp = 32;
+	h->mode = 2;
+	h->fps = 3;
+	h->frames = 2;
+	memset(file + 0x40, 1, 128);
+	offsets[0] = (uint32_t)size;
+	size += StreamFrame(file + size, 0, h->type);
+	offsets[1] = (uint32_t)size;
+	size += StreamFrame(file + size, 1, h->type);
+	memcpy(file + 0xc0, offsets, sizeof offsets);
+	CHECK(BfMovie_Check(file, (uint32_t)size));
+	CHECK(!BfMovie_IsSimple(file));
+	memset(decoded, 0xab, sizeof decoded);
+	for(i = 0; i < 128; i++)
+	{
+		expected[i * 4] = expected[i * 4 + 1] = expected[i * 4 + 2] = 128;
+		expected[i * 4 + 3] = 42;
+	}
+	CHECK(BfMovie_DecodeFrame(file, (uint32_t)size, 0, decoded, 64));
+	CHECK(memcmp(decoded, expected, sizeof decoded) == 0);
+	for(i = 0; i < 128; i++)
+		if(i % 16 >= 8)
+		{
+			expected[i * 4] = expected[i * 4 + 1] = expected[i * 4 + 2] = 144;
+			expected[i * 4 + 3] = 77;
+		}
+	CHECK(BfMovie_DecodeFrame(file, (uint32_t)size, 1, decoded, 64));
+	CHECK(memcmp(decoded, expected, sizeof decoded) == 0);
+	/* Truncated alpha, invalid row offset, and short pitch fail atomically. */
+	CHECK(!BfMovie_DecodeFrame(file, (uint32_t)size - 1, 1, decoded, 64));
+	CHECK(memcmp(decoded, expected, sizeof decoded) == 0);
+	memcpy(&saved, file + offsets[1] + 192, 4);
+	memset(file + offsets[1] + 192, 0xff, 4);
+	CHECK(!BfMovie_DecodeFrame(file, (uint32_t)size, 1, decoded, 64));
+	CHECK(memcmp(decoded, expected, sizeof decoded) == 0);
+	memcpy(file + offsets[1] + 192, &saved, 4);
+	CHECK(!BfMovie_DecodeFrame(file, (uint32_t)size, 0, decoded, 60));
+	{
+		int32_t no, info[5];
+		Bmp_t b;
+		gBmpMgr = BmpMgr_New(1);
+		BmpMgr_Create(gBmpMgr, 0, 16, 8, PM_ARGB32);
+		CHECK(BmSeq_Register(file, (uint32_t)size, &no, info) == 0);
+		CHECK(BmSeq_Decode(0, no, 0) == 0);
+		CHECK(BmSeq_Decode(0, no, 1) == 0);
+		BmpMgr_GetInfo(gBmpMgr, &b, 0);
+		CHECK(memcmp(b.pixels, expected, sizeof expected) == 0);
+		BmSeq_FreeAll();
+		BmpMgr_Delete(gBmpMgr);
+		gBmpMgr = NULL;
+	}
+	/* The older streamed type omits the alpha coding word. */
+	h->type = 0x10000;
+	h->frames = 1;
+	size = offsets[0] + StreamFrame(file + offsets[0], 0, h->type);
+	CHECK(BfMovie_DecodeFrame(file, (uint32_t)size, 0, decoded, 64));
+	CHECK(decoded[0] == 128 && decoded[3] == 42);
+	h->bpp = 24;
+	CHECK(BfMovie_DecodeFrame(file, (uint32_t)size, 0, decoded, 64));
+	CHECK(decoded[0] == 128 && decoded[3] == 0);
+	h->frames = UINT32_MAX;
+	CHECK(!BfMovie_Check(file, (uint32_t)size));
+}
+
 /* The smoke test on a real movie: when BGI_BM_FILE names a .bm file, read
  * it, check its header and decode every frame in sequence into one
  * buffer; all of them have to succeed.  With BGI_BM_OUT set the last
@@ -567,6 +702,7 @@ int main(void)
 	OS_Init();
 	TestMovie(32);
 	TestMovie(24);
+	TestStreamMovie();
 	TestRealFile();
 	if(chdir("/") == 0)
 		remove(dir);

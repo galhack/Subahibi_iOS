@@ -146,7 +146,10 @@ uint32_t GetFileLoadCapacity(const char* arc, const char* name)
 	uint32_t stored = GetFileSizeFast(arc, name);
 	uint32_t decoded = 0, count;
 	if(!stored)
+	{
+		fprintf(stderr, "bgi: cannot determine load capacity for %s:%s\n", arc ? arc : "-", name);
 		return 0;
+	}
 	count = stored < sizeof(header) ? stored : (uint32_t)sizeof(header);
 	if(LoadFileRange(&header, arc, name, 0, count) != 0)
 		ThrowScriptError("Cannot read resource header");

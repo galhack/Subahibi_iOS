@@ -114,8 +114,7 @@ uint32_t BmSeq_Clone(int32_t no, int32_t* outNo)
 /* Decode frame `frame` of movie `no` into bitmap slot bmpNo, which must
  * hold a 32-bit bitmap of the movie's width, height and pixel mode.  0 ok,
  * 0x80000003 no such number, 0x80000004 no such frame, 0x80000005 the
- * slot does not match, 0x8000000A a streamed movie type this build does
- * not decode (reported once on stderr), 0x80000008 the decoder failed. */
+ * slot does not match, 0x80000008 the decoder failed. */
 uint32_t BmSeq_Decode(int bmpNo, int32_t no, uint32_t frame)
 {
 	BmSeq_t* s = Find(no);
@@ -129,17 +128,7 @@ uint32_t BmSeq_Decode(int bmpNo, int32_t no, uint32_t frame)
 	if(!BmpMgr_GetInfo(gBmpMgr, &b, bmpNo) || (uint32_t)b.w != h->width || (uint32_t)b.h != h->height ||
 		(uint32_t)b.mode != h->mode || b.bpp != 4)
 		return 0x80000005u;
-	if(!BfMovie_IsSimple(s->data))
-	{
-		static int warned;
-		if(!warned)
-		{
-			fprintf(stderr, "bgi: BF_Movie type 0x%x (the streamed form) is not decoded by this build\n",
-				(unsigned)h->type);
-			warned = 1;
-		}
-		return 0x8000000au;
-	}
+
 	if(!BfMovie_DecodeFrame(s->data, s->size, frame, b.pixels, b.pitch))
 		return 0x80000008u; // (the pool's "decode failed")
 	return 0;

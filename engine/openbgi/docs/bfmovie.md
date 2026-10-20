@@ -21,13 +21,13 @@ decodes a real movie).
 ## The container
 
     +00  "BF_Movie_______\0"
-    +10  type: 0 (all files seen); 0x10000 / 0x10001 the streamed form
+    +10  type: 0 (lossless); 0x10000 / 0x10001 the streamed transform form
     +14  width          +18 height
     +1C  bits per pixel (24 or 32)
     +20  pixel mode the target slot must have (1 RGB32 for 24 bpp, 2 ARGB32 for 32)
     +24  frames per second    +28 frame count
-    +2C .. +3F  zero
-    +40  one 32-bit offset per frame, from the start of the file; frame i
+    +2C quality / encoder settings; +30 .. +3F reserved
+    +40  type 0: one 32-bit offset per frame, from the start of the file; frame i
          runs to the offset of frame i + 1, the last one to the end
 
 ### A frame
@@ -65,11 +65,43 @@ Three stages (`BfMovie_DecodeFrame` and its helpers in
      taken before the frame is written, so displacements may point at
      pixels the frame has already changed.
 
-The frames of the "streamed" types 0x10000 / 0x10001 have a 0xC0-byte
-header with the offsets at +0xC0 and go through another decoder, with
-the frame data read from the archive on demand.  No game examined ships
-such a file; the engine here reports them as code 0x8000000A (and once on
-stderr) if one turns up.
+### Streamed transform frames (0x10000 / 0x10001)
+
+These are supported by `BGI_CbgMovieFrame` in `src/core/cbg2.c`, sharing
+CBG2 Huffman and inverse-DCT code. The original loads frames on demand;
+this port currently keeps the whole movie file in memory. This support is
+separate from DirectShow playback and the video texture interfaces below.
+
+The header extends to 0xC0: +0x40 holds a 64-byte luma quantisation table,
++0x80 a 64-byte chroma table, and frame offsets begin at +0xC0. Dimensions
+must be divisible by eight, matching the original encoder. Other dimensions
+are rejected. Each frame has:
+
+1. 16 varint DC weights, 176 varint AC weights, and `height / 8 + 1`
+   little-endian row offsets relative to the frame start (last is alpha).
+2. Each row begins with a low-bit-first mask of its `width / 8` blocks.
+   Unset blocks retain the preceding frame. A varint gives the coefficient
+   count, exactly `changed blocks * 3 * 64`. CBG2 MSB-first Huffman streams
+   encode all DC differences, byte alignment, then zigzag AC coefficients.
+   Coefficients are grouped by channel, containing only changed blocks.
+3. 32-bit movies have an independent alpha plane. Type 0x10000 uses the
+   CBG2 literal/back-reference stream without a coding word. Type 0x10001
+   prefixes a 32-bit coding word: 1 selects that LZ stream, 2 selects a
+   32-bit decoded length, 256 varint Huffman weights, and an MSB-first
+   stream. The decoded bytes are a whole-picture block mask followed by
+   64 literal alpha samples per changed block; other alpha remains intact.
+
+Evidence is the game's original BGI.exe decoder at 0x004a63d0 (frame
+layout), 0x004a6c70 (sparse RGB), 0x004a9490 (LZ alpha), and 0x004a9130 /
+0x004a96f0 (sparse Huffman alpha). The private `guruguru.bm` sample uses
+0x10001, 1280x960, 32 bpp, eight frames at 3 fps. All eight frames decode
+under AddressSanitizer and UndefinedBehaviorSanitizer; private files and
+rendered frames are not distributed. Synthetic tests cover both types,
+24/32 bpp, sparse RGB/alpha preservation, registry playback, and rejection
+of truncated streams, bad offsets, short pitch and overflowing frame counts.
+Streamed decoding is transactional: malformed data returns failure without
+changing the destination. This is not a claim of bit-exact agreement with
+all original SIMD rounding paths or support for every BF_Movie variant.
 
 ## The registry and the instructions
 
@@ -79,12 +111,12 @@ second number, and the data goes with the last of the pair.
 
 | | | |
 |---|---|---|
-| `90 F4` | `&no, &info, name, arc →` | the file is read by the loader thread (`WaitSeqLoad` in `src/wait/wait_load.c`); when it is in, the record is made (`BmSeq_Register`) and `info[5]` receives width, height, pixel mode, frame rate, frame count; the wait pushes 0 ok / 1 / 2 not a movie when it ends |
+| `90 F4` | `&no, &info, arc, name →` | the file is read by the loader thread (`WaitSeqLoad` in `src/wait/wait_load.c`); when it is in, the record is made (`BmSeq_Register`) and `info[5]` receives width, height, pixel mode, frame rate, frame count; the wait pushes 0 ok / 1 / 2 not a movie when it ends |
 | `90 F5` | `no → r` | release: 0 ok, 3 no such number |
 | `90 F6` | `bmp, no, frame → r` | decode the frame into the slot: 0 ok, 3 no such number, 4 no such frame, 5 the slot's size or pixel mode differs, 6; other codes raw |
 | `90 F7` | `no, &out → r` | a clone of `no` under a new number: 0 ok, 3, 7 already cloned |
 | `80 53` | `→` | the next `90 F6` runs inside a wait object (`WaitSeqDecode`; the original hands the frame to a decoder pool and polls the job, here the frame is decoded on the first poll) which pushes the result instead: 0 ok, 3, 5, 8 decode failed |
-| `92 F1` | `&no, &info, name, arc, streamed →` | the `90 F4` load with a flag choosing the streamed form (only the header and index are read and the frames come from the archive); the whole file is loaded here either way |
+| `92 F1` | `&no, &info, arc, name, streamed →` | the `90 F4` load with a flag choosing the streamed form (only the header and index are read and the frames come from the archive); the whole file is loaded here either way |
 | `92 F0` | `arc, name, x, y, w, h → length` | a DirectShow movie played out of an archive entry; without video playback the answer is 0 like `90 F0`'s |
 
 The scripts drive the playback themselves: `moviemngrbm._bp` keeps a

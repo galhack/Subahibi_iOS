@@ -17,12 +17,14 @@
  *   DeltaFrame   a later frame: 8 x 8 blocks against a copy of the previous
  *                frame; Block decodes one changed block
  *
+ * Streamed types dispatch to BGI_CbgMovieFrame in cbg2.c instead.
  * BfMovie_DecodeFrame is the entry; bmseq.c calls it for the "90 F6"
  * instruction and extract.c for the --extract conversion.  Every stage is
  * bounded by the frame's length, so a malformed frame yields garbage pixels
  * rather than an out-of-bounds read.
  */
 #include "bgi/bfmovie.h"
+#include "bgi/codec.h"
 
 // 1 when the magic matches and the header with its offset table fits in `size`
 int BfMovie_Check(const void* data, uint32_t size)
@@ -30,10 +32,15 @@ int BfMovie_Check(const void* data, uint32_t size)
 	const BfMovieHeader_t* h = (const BfMovieHeader_t*)data;
 	if(size < 0x40 || memcmp(h->magic, BFMOVIE_MAGIC, 16) != 0)
 		return 0;
-	return size >= 0x40 + (uint32_t)h->frames * 4;
+	uint32_t table = h->type == 0 ? 0x40 : 0xc0;
+	if(h->type != 0 && h->type != 0x10000 && h->type != 0x10001)
+		return 0;
+	return size >= table && h->frames <= (size - table) / 4 && h->frames &&
+		h->width && h->height && h->width <= 16384 && h->height <= 16384 &&
+		(h->bpp == 24 || h->bpp == 32);
 }
 
-// 1 for type 0, the only type decodable here
+// 1 for the lossless type 0 (streamed transform types are also decoded)
 int BfMovie_IsSimple(const void* data)
 {
 	return ((const BfMovieHeader_t*)data)->type == 0;
@@ -379,13 +386,23 @@ int BfMovie_DecodeFrame(const void* data, uint32_t size, uint32_t frame, uint8_t
 	uint8_t* pixels;
 	if(!BfMovie_Check(data, size) || frame >= h->frames)
 		return 0;
-	start = h->offset[frame];
+	if(!dst || pitch < (int)h->width * 4)
+		return 0;
+	const uint8_t* table = file + (h->type ? 0xc0 : 0x40);
+	memcpy(&start, table + frame * 4, 4);
 	if(start >= size)
 		return 0;
-	len = (frame + 1 < h->frames ? h->offset[frame + 1] : size);
+	len = size;
+	if(frame + 1 < h->frames)
+		memcpy(&len, table + (frame + 1) * 4, 4);
 	if(len > size || len <= start)
 		return 0;
+	if(start < (h->type ? 0xc0u : 0x40u) + h->frames * 4)
+		return 0;
 	len -= start;
+	if(h->type)
+		return BGI_CbgMovieFrame(file + start, len, file + 0x40, h->type,
+			(int)h->width, (int)h->height, (int)h->bpp, dst, pitch);
 	// a delta frame's pixel stream may read two bytes past its end
 	pixels = Unpack(file + start, len, frame ? 2 : 0, &unpacked);
 	if(!pixels)

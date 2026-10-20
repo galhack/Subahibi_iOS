@@ -331,6 +331,7 @@ int VmMain(void)
 		}
 	}
 
+	Vm_TraceDump();
 	Vm_TraceShutdown();
 	Thread_Delete(gRootThread);
 	gRootThread = NULL;

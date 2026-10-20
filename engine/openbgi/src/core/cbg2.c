@@ -75,6 +75,8 @@ static int ReadVarint(const uint8_t** pp, const uint8_t* end)
 		if(p >= end || shift >= 32)
 			return -1;
 		c = *p++;
+		if(shift == 28 && (c & 0x70))
+			return -1;
 		v |= (uint32_t)(c & 0x7f) << shift;
 		shift += 7;
 	} while(c & 0x80);
@@ -94,7 +96,7 @@ typedef struct HNode
 
 typedef struct HTree
 {
-	HNode_t nodes[2 * 0xB0 + 2];
+	HNode_t nodes[2 * 256 + 2];
 	int root;
 } HTree_t;
 
@@ -176,21 +178,137 @@ static int HTree_Decode(const HTree_t* t, MsbBits_t* b)
 // ---- the inverse DCT ----------------------------------------------------------------------
 
 static const float kDctScale[64] = {
-	1.00000000f, 1.38703990f, 1.30656302f, 1.17587554f, 1.00000000f, 0.78569496f, 0.54119611f, 0.27589938f,
-	1.38703990f, 1.92387950f, 1.81225491f, 1.63098633f, 1.38703990f, 1.08979023f, 0.75066054f, 0.38268343f,
-	1.30656302f, 1.81225491f, 1.70710683f, 1.53635550f, 1.30656302f, 1.02655995f, 0.70710677f, 0.36047992f,
-	1.17587554f, 1.63098633f, 1.53635550f, 1.38268340f, 1.17587554f, 0.92387950f, 0.63637930f, 0.32442334f,
-	1.00000000f, 1.38703990f, 1.30656302f, 1.17587554f, 1.00000000f, 0.78569496f, 0.54119611f, 0.27589938f,
-	0.78569496f, 1.08979023f, 1.02655995f, 0.92387950f, 0.78569496f, 0.61731654f, 0.42521504f, 0.21677275f,
-	0.54119611f, 0.75066054f, 0.70710677f, 0.63637930f, 0.54119611f, 0.42521504f, 0.29289323f, 0.14931567f,
-	0.27589938f, 0.38268343f, 0.36047992f, 0.32442334f, 0.27589938f, 0.21677275f, 0.14931567f, 0.07612047f,
+	1.00000000f,
+	1.38703990f,
+	1.30656302f,
+	1.17587554f,
+	1.00000000f,
+	0.78569496f,
+	0.54119611f,
+	0.27589938f,
+	1.38703990f,
+	1.92387950f,
+	1.81225491f,
+	1.63098633f,
+	1.38703990f,
+	1.08979023f,
+	0.75066054f,
+	0.38268343f,
+	1.30656302f,
+	1.81225491f,
+	1.70710683f,
+	1.53635550f,
+	1.30656302f,
+	1.02655995f,
+	0.70710677f,
+	0.36047992f,
+	1.17587554f,
+	1.63098633f,
+	1.53635550f,
+	1.38268340f,
+	1.17587554f,
+	0.92387950f,
+	0.63637930f,
+	0.32442334f,
+	1.00000000f,
+	1.38703990f,
+	1.30656302f,
+	1.17587554f,
+	1.00000000f,
+	0.78569496f,
+	0.54119611f,
+	0.27589938f,
+	0.78569496f,
+	1.08979023f,
+	1.02655995f,
+	0.92387950f,
+	0.78569496f,
+	0.61731654f,
+	0.42521504f,
+	0.21677275f,
+	0.54119611f,
+	0.75066054f,
+	0.70710677f,
+	0.63637930f,
+	0.54119611f,
+	0.42521504f,
+	0.29289323f,
+	0.14931567f,
+	0.27589938f,
+	0.38268343f,
+	0.36047992f,
+	0.32442334f,
+	0.27589938f,
+	0.21677275f,
+	0.14931567f,
+	0.07612047f,
 };
 
 static const uint8_t kZigzag[64] = {
-	0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5,
-	12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28,
-	35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51,
-	58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
+	0,
+	1,
+	8,
+	16,
+	9,
+	2,
+	3,
+	10,
+	17,
+	24,
+	32,
+	25,
+	18,
+	11,
+	4,
+	5,
+	12,
+	19,
+	26,
+	33,
+	40,
+	48,
+	41,
+	34,
+	27,
+	20,
+	13,
+	6,
+	7,
+	14,
+	21,
+	28,
+	35,
+	42,
+	49,
+	56,
+	57,
+	50,
+	43,
+	36,
+	29,
+	22,
+	15,
+	23,
+	30,
+	37,
+	44,
+	51,
+	58,
+	59,
+	52,
+	45,
+	38,
+	31,
+	39,
+	46,
+	53,
+	60,
+	61,
+	54,
+	47,
+	55,
+	62,
+	63,
 };
 
 static uint8_t ToSample(float f)
@@ -313,8 +431,8 @@ typedef struct Cbg2
 {
 	float quant[2][64];
 	HTree_t dcTree, acTree;
-	int w, h;     // the coded size, padded to 8
-	int channels; // 1 (8 bpp) or 3
+	int w, h;      // the coded size, padded to 8
+	int channels;  // 1 (8 bpp) or 3
 	uint8_t* bgra; // w * h * 4, the decoded picture
 } Cbg2_t;
 
@@ -427,7 +545,7 @@ static int Cbg2_Alpha(Cbg2_t* d, const uint8_t* src, const uint8_t* end)
 				y -= 8;
 			count = ((v >> 9) & 0x7f) + 3;
 			from = (long)dst + ((long)x + (long)y * d->w) * 4;
-			if(from < 0 || (size_t)from >= dst)
+			if(from < 0 || (size_t)from >= dst || (size_t)count > (total - dst + 3) / 4)
 				return 0;
 			for(k = 0; k < count && dst < total; k++)
 			{
@@ -587,4 +705,241 @@ done:
 		BGI_Free(offs);
 	BGI_Free(d);
 	return ok ? 0 : 0x80000004u;
+}
+
+/* BF_Movie 0x10000/0x10001 uses the same transform as CBG2, with
+ * unencrypted quantisation tables and sparse rows. Original BGI.exe:
+ * 004a63d0 sets up the rows, 004a6c70 consumes only set mask blocks,
+ * 004a9130 applies the independently coded sparse alpha plane. */
+static uint32_t MovieU32(const uint8_t* p)
+{
+	return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24;
+}
+
+static int MovieWeights(HTree_t* tree, const uint8_t** p, const uint8_t* end, int leaves)
+{
+	uint32_t weights[256];
+	uint64_t total = 0;
+	int i;
+	for(i = 0; i < leaves; i++)
+	{
+		int v = ReadVarint(p, end);
+		if(v < 0)
+			return 0;
+		weights[i] = (uint32_t)v;
+		total += weights[i];
+	}
+	return total <= 0x7fffffffu && HTree_Build(tree, weights, leaves);
+}
+
+static int MovieSigned(MsbBits_t* b, int count, int* out)
+{
+	int v;
+	if(count < 0 || count > 15 || (v = Bits_Get(b, count)) < 0)
+		return 0;
+	*out = count && !(v & (1 << (count - 1))) ? v - ((1 << count) - 1) : v;
+	return 1;
+}
+
+static int MovieRow(Cbg2_t* d, const uint8_t* src, const uint8_t* end, int by, int16_t* coef)
+{
+	int blocks = d->w / 8, maskSize = (blocks + 7) / 8, present = 0;
+	int bx, i, c, count, value, acc = 0, size, current = 0;
+	const uint8_t* mask = src;
+	MsbBits_t b;
+	if(end - src < maskSize)
+		return 0;
+	for(bx = 0; bx < blocks; bx++)
+		present += (mask[bx / 8] >> (bx % 8)) & 1;
+	src += maskSize;
+	size = ReadVarint(&src, end);
+	if(size != present * 64 * 3)
+		return 0;
+	memset(coef, 0, (size_t)size * sizeof *coef);
+	b = (MsbBits_t){src, end, 0, 0};
+	for(i = 0; i < size; i += 64)
+	{
+		count = HTree_Decode(&d->dcTree, &b);
+		if(!MovieSigned(&b, count, &value))
+			return 0;
+		acc += value;
+		if(acc < -32768 || acc > 32767)
+			return 0;
+		coef[i] = (int16_t)acc;
+	}
+	if(b.cached & 7)
+		Bits_Get(&b, b.cached & 7);
+	for(i = 0; i < size; i += 64)
+	{
+		int index = 1;
+		while(index < 64)
+		{
+			int code = HTree_Decode(&d->acTree, &b);
+			if(code < 0)
+				return 0;
+			if(code == 0)
+				break;
+			if(code == 15)
+			{
+				index += 16;
+				if(index > 64)
+					return 0;
+				continue;
+			}
+			index += code & 15;
+			if(index >= 64 || !MovieSigned(&b, code >> 4, &value))
+				return 0;
+			coef[i + kZigzag[index++]] = (int16_t)value;
+		}
+	}
+	for(bx = 0; bx < blocks; bx++)
+	{
+		uint8_t sample[3][64];
+		int j;
+		if(!(mask[bx / 8] & (1 << (bx % 8))))
+			continue;
+		for(c = 0; c < 3; c++)
+			InverseDct(coef + (c * present + current) * 64, d->quant[c > 0], sample[c]);
+		current++;
+		for(j = 0; j < 64; j++)
+		{
+			uint8_t* px = d->bgra + (((size_t)by * 8 + j / 8) * d->w + bx * 8 + j % 8) * 4;
+			float y = sample[0][j], cb = sample[1][j], cr = sample[2][j];
+			px[0] = ToByte(y + 1.772f * cb - 226.316f);
+			px[1] = ToByte(y - 0.34414f * cb - 0.71414f * cr + 135.95984f);
+			px[2] = ToByte(y + 1.402f * cr - 178.956f);
+		}
+	}
+	return 1;
+}
+
+static int MovieAlpha(Cbg2_t* d, const uint8_t* src, const uint8_t* end, uint32_t type)
+{
+	uint32_t kind = 1;
+	if(type == 0x10001)
+	{
+		if(end - src < 4)
+			return 0;
+		kind = MovieU32(src);
+		src += 4;
+	}
+	if(kind == 1)
+	{
+		/* Cbg2_Alpha expects the type word; type 0x10000 omits it. */
+		if(type == 0x10001)
+			return Cbg2_Alpha(d, src - 4, end);
+		{
+			size_t n = (size_t)(end - src);
+			uint8_t* copy = (uint8_t*)BGI_Alloc(n + 4);
+			int ok;
+			memset(copy, 0, 4);
+			copy[0] = 1;
+			memcpy(copy + 4, src, n);
+			ok = Cbg2_Alpha(d, copy, copy + n + 4);
+			BGI_Free(copy);
+			return ok;
+		}
+	}
+	if(kind == 2)
+	{
+		HTree_t tree;
+		MsbBits_t bits;
+		uint8_t* unpacked;
+		uint32_t n, i, offset, blocks = (uint32_t)(d->w / 8) * (d->h / 8);
+		uint32_t maskSize = (blocks + 7) / 8;
+		int ok = 0;
+		if(end - src < 4)
+			return 0;
+		n = MovieU32(src);
+		src += 4;
+		if(n < maskSize || n > maskSize + (uint32_t)d->w * d->h || !MovieWeights(&tree, &src, end, 256))
+			return 0;
+		unpacked = (uint8_t*)BGI_Alloc(n);
+		bits = (MsbBits_t){src, end, 0, 0};
+		for(i = 0; i < n; i++)
+		{
+			int v = HTree_Decode(&tree, &bits);
+			if(v < 0)
+				goto done;
+			unpacked[i] = (uint8_t)v;
+		}
+		offset = maskSize;
+		for(i = 0; i < blocks; i++)
+		{
+			int j;
+			if(!(unpacked[i / 8] & (1 << (i % 8))))
+				continue;
+			if(n - offset < 64)
+				goto done;
+			for(j = 0; j < 64; j++)
+			{
+				size_t x = (i % (d->w / 8)) * 8 + j % 8;
+				size_t y = (i / (d->w / 8)) * 8 + j / 8;
+				d->bgra[(y * d->w + x) * 4 + 3] = unpacked[offset++];
+			}
+		}
+		ok = offset == n;
+	done:
+		BGI_Free(unpacked);
+		return ok;
+	}
+	return 0;
+}
+
+/* Decode into a temporary picture: a malformed row never changes the caller's
+ * previous frame. Dimensions here must be multiples of 8, as stored by the
+ * original movie encoder; arbitrary image dimensions belong to CBG2 instead. */
+int BGI_CbgMovieFrame(const uint8_t* src, uint32_t size, const uint8_t quant[128],
+	uint32_t type, int w, int h, int bpp, uint8_t* dst, int pitch)
+{
+	Cbg2_t d;
+	const uint8_t *p = src, *end = src + size, *offsets;
+	int16_t* coef = NULL;
+	int rows = h / 8, y, i, ok = 0;
+	uint32_t previous;
+	if(w <= 0 || h <= 0 || (w & 7) || (h & 7) || (bpp != 24 && bpp != 32) ||
+		(uint64_t)w * h * 4 > 0x10000000u || pitch < w * 4)
+		return 0;
+	memset(&d, 0, sizeof d);
+	d.w = w;
+	d.h = h;
+	for(i = 0; i < 128; i++)
+	{
+		if(!quant[i])
+			return 0;
+		d.quant[i / 64][i % 64] = quant[i] * kDctScale[i % 64];
+	}
+	if(!MovieWeights(&d.dcTree, &p, end, 16) || !MovieWeights(&d.acTree, &p, end, 176) ||
+		(size_t)(end - p) < (size_t)(rows + 1) * 4)
+		return 0;
+	offsets = p;
+	previous = (uint32_t)(p - src) + (uint32_t)(rows + 1) * 4;
+	for(i = 0; i <= rows; i++)
+	{
+		uint32_t offset = MovieU32(offsets + i * 4);
+		if(offset < previous || offset > size)
+			return 0;
+		previous = offset;
+	}
+	d.bgra = (uint8_t*)BGI_Alloc((size_t)w * h * 4);
+	for(y = 0; y < h; y++)
+		memcpy(d.bgra + (size_t)y * w * 4, dst + (size_t)y * pitch, (size_t)w * 4);
+	coef = (int16_t*)BGI_Alloc((size_t)w * 8 * 3 * sizeof *coef);
+	for(y = 0; y < rows; y++)
+		if(!MovieRow(&d, src + MovieU32(offsets + y * 4), src + MovieU32(offsets + (y + 1) * 4), y, coef))
+			goto done;
+	if(bpp == 32 && !MovieAlpha(&d, src + MovieU32(offsets + rows * 4), end, type))
+		goto done;
+	for(y = 0; y < h; y++)
+	{
+		if(bpp == 24)
+			for(i = 0; i < w; i++)
+				d.bgra[((size_t)y * w + i) * 4 + 3] = 0;
+		memcpy(dst + (size_t)y * pitch, d.bgra + (size_t)y * w * 4, (size_t)w * 4);
+	}
+	ok = 1;
+done:
+	BGI_Free(coef);
+	BGI_Free(d.bgra);
+	return ok;
 }

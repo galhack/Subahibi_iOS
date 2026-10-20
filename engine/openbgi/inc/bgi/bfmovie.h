@@ -10,10 +10,16 @@
  * one key frame and delta frames, decoded straight into a bitmap slot.  The
  * frames of the games examined (PrismRhythm's data02007.arc) are of the
  * in-memory type 0.  Types 0x10000 / 0x10001 are the streamed variant
- * (frames read from the archive on demand), which has not been met in the
- * data and is not decoded here.
+ * (frames read from the archive on demand in the original engine). They
+ * use sparse CBG2 transform blocks and are decoded here from the loaded file.
  *
- * File layout (little-endian, byte offsets):
+ * Streamed types store two 64-byte quantisation tables at +0x40 and frame
+ * offsets at +0xC0. Each frame contains DC/AC Huffman weights, row offsets,
+ * and sparse rows of 8x8 CBG2 blocks; alpha is LZ77 or Huffman-coded sparse
+ * blocks. These types require dimensions divisible by 8, as in the original
+ * encoder. A failed streamed decode leaves the target unchanged.
+ *
+ * Type 0 file layout (little-endian, byte offsets):
  *   0x00 "BF_Movie_______\0"       0x10 type (0 here)
  *   0x14 width   0x18 height       0x1C bits per pixel (24 / 32)
  *   0x20 pixel mode of the target slot (1 RGB32, 2 ARGB32)
@@ -45,7 +51,7 @@
 typedef struct BfMovieHeader // file layout, 0x40 bytes plus the offset table
 {
 	char magic[16];
-	uint32_t type;      // 0: frames in the file; 0x10000 / 0x10001: streamed (not decoded)
+	uint32_t type;      // 0: lossless; 0x10000 / 0x10001: CBG2 transform frames
 	uint32_t width;     // pixels
 	uint32_t height;    // pixels
 	uint32_t bpp;       // bits per pixel, 24 or 32
@@ -58,7 +64,7 @@ typedef struct BfMovieHeader // file layout, 0x40 bytes plus the offset table
 
 // 1 when the magic matches and the header with its offset table fits in `size`
 int BfMovie_Check(const void* data, uint32_t size);
-int BfMovie_IsSimple(const void* data); // 1 for type 0, the only type decodable here
+int BfMovie_IsSimple(const void* data); // 1 for the lossless type 0 (streamed types are also supported)
 
 /* decode frame `frame` of the movie into `dst` (width x height pixels of
  * 4 bytes, `pitch` bytes per row; the target must have the movie's size,

@@ -90,6 +90,19 @@ int BmpOp_LoadLocal(int slot, const char* path)
 	return r;
 }
 
+/* BMP fields are little-endian and not naturally aligned, even when
+ * the file buffer itself is aligned. */
+static uint16_t BmpRead16(const uint8_t* p)
+{
+	return (uint16_t)((uint16_t)p[0] | ((uint16_t)p[1] << 8));
+}
+
+static uint32_t BmpRead32(const uint8_t* p)
+{
+	return (uint32_t)p[0] | ((uint32_t)p[1] << 8) |
+		((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+}
+
 /* Decode an uncompressed Windows BMP (8 bpp -> GRAY8, 16 -> RGB16, 24 ->
  * RGB32, 32 -> ARGB32) into a slot through BmpMgr_PutPixels.  0 ok,
  * 0x80000001 not a BMP, ..2 not a 40-byte BITMAPINFOHEADER, ..3 planes
@@ -98,17 +111,17 @@ int BmpOp_LoadLocal(int slot, const char* path)
 int BmpOp_DecodeBmp(int slot, const void* data)
 {
 	const uint8_t* d = (const uint8_t*)data;
-	uint32_t w, h, bpp, rowBytes, srcOff, y;
+	uint32_t w, h, bpp, rowBytes, srcOff, pixelOff, y;
 	int mode, ok;
 	uint8_t* pixels;
 
 	if(d[0] != 'B' || d[1] != 'M')
 		return (int)0x80000001;
-	if(*(const uint32_t*)(d + 0xe) != 0x28) // biSize
+	if(BmpRead32(d + 0xe) != 0x28) // biSize
 		return (int)0x80000002;
-	if(*(const uint16_t*)(d + 0x1a) != 1) // biPlanes
+	if(BmpRead16(d + 0x1a) != 1) // biPlanes
 		return (int)0x80000003;
-	bpp = *(const uint16_t*)(d + 0x1c);
+	bpp = BmpRead16(d + 0x1c);
 	switch(bpp)
 	{
 		case 8: mode = PM_GRAY8; break;
@@ -117,20 +130,21 @@ int BmpOp_DecodeBmp(int slot, const void* data)
 		case 32: mode = PM_ARGB32; break;
 		default: return (int)0x80000004;
 	}
-	if(*(const uint32_t*)(d + 0x1e) != 0) // biCompression
+	if(BmpRead32(d + 0x1e) != 0) // biCompression
 		return (int)0x80000005;
-	w = *(const uint32_t*)(d + 0x12);
-	h = *(const uint32_t*)(d + 0x16);
+	w = BmpRead32(d + 0x12);
+	h = BmpRead32(d + 0x16);
 	if(w == 0 || h == 0)
 		return (int)0x80000006;
 	// the file's rows are bottom-up and padded to four bytes; the manager
 	// wants packed top-down rows
 	rowBytes = w * (bpp >> 3);
 	pixels = (uint8_t*)BGI_Alloc((size_t)rowBytes * h);
+	pixelOff = BmpRead32(d + 0xa);
 	srcOff = 0;
 	for(y = 0; y < h; y++)
 	{
-		memcpy(pixels + (size_t)(h - 1 - y) * rowBytes, d + *(const uint32_t*)(d + 0xa) + srcOff, rowBytes);
+		memcpy(pixels + (size_t)(h - 1 - y) * rowBytes, d + pixelOff + srcOff, rowBytes);
 		srcOff = (srcOff + rowBytes + 3) & ~3u;
 	}
 	ok = BmpMgr_PutPixels(gBmpMgr, slot, (int)w, (int)h, mode, pixels);

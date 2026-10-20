@@ -269,13 +269,14 @@ static const char* kLibrary = "#style library\n"
 
 static void TestCompile(void)
 {
-	uint32_t size, base, i, n;
+	uint32_t size, base, i, n, codeLen;
 	uint8_t* img = Compile(kScenario, &size, 0);
 	CHECK(img != NULL);
 	if(!img)
 		return;
 	base = 0x1c + Rd32(img + 0x1c);
-	CHECK(base == 0x40); // 0x24 + "framework\0" (10) + 4 = 0x32 -> 14 bytes of padding
+	codeLen = Tok(img, 4) / 4; // first string operand marks the end of code
+	CHECK(base == 0x40);       // 0x24 + "framework\0" (10) + 4 = 0x32 -> 14 bytes of padding
 	// the entry jump, then the first statement's marker: str "t.txt"; push 1; args 2; lineinfo
 	CHECK(Tok(img, 0) == SCN_ADDR && Tok(img, 2) == SCN_JMP);
 	CHECK(Tok(img, 3) == SCN_STR && Tok(img, 5) == SCN_PUSH && Tok(img, 6) == 1 && Tok(img, 7) == SCN_ARGS && Tok(img, 8) == 2 && Tok(img, 9) == SCN_LINEINFO);
@@ -289,23 +290,23 @@ static void TestCompile(void)
 		CHECK(strcmp(s + strStart + 6, "intro") == 0);
 	}
 	// the user function call: args left to right, the name, callfn
-	for(i = 0, n = 0; i < 400; i++)
+	for(i = 0, n = 0; i < codeLen; i += 1 + (uint32_t)Scn_OperandCount(Tok(img, i)))
 		if(Tok(img, i) == SCN_CALLFN)
 			n++;
 	CHECK(n == 2);
 	// msg: the direct form, the arguments right to left so that the text ends on top, no args token
-	i = FindTok(img, 0x140, 0, 400);
-	CHECK(i < 400 && Tok(img, i - 2) == SCN_STR && Tok(img, i - 4) == SCN_STR && Tok(img, i - 6) == SCN_PUSH && Tok(img, i - 5) == 0 && Tok(img, i - 10) == SCN_PUSH && Tok(img, i - 9) == 1);
+	i = FindTok(img, 0x140, 0, codeLen);
+	CHECK(i < codeLen && Tok(img, i - 2) == SCN_STR && Tok(img, i - 4) == SCN_STR && Tok(img, i - 6) == SCN_PUSH && Tok(img, i - 5) == 0 && Tok(img, i - 10) == SCN_PUSH && Tok(img, i - 9) == 1);
 	{
 		const char* s = (const char*)img + base;
 		CHECK(strcmp(s + Tok(img, i - 1), "Hello") == 0 && strcmp(s + Tok(img, i - 3), "Name") == 0);
 	}
 	// set_lwork!(2, lwork!(1)): push 1; lwork; push 2; set_lwork - nothing reversed, no args tokens
-	i = FindTok(img, 0xe0, FindTok(img, 0x94, 0, 400), 400); // the second set_lwork, after the string assignment
-	CHECK(i < 400 && Tok(img, i - 2) == SCN_PUSH && Tok(img, i - 1) == 2 && Tok(img, i - 3) == 0xe1 && Tok(img, i - 5) == SCN_PUSH && Tok(img, i - 4) == 1);
+	i = FindTok(img, 0xe0, FindTok(img, 0x94, 0, codeLen), codeLen); // the second set_lwork, after the string assignment
+	CHECK(i < codeLen && Tok(img, i - 2) == SCN_PUSH && Tok(img, i - 1) == 2 && Tok(img, i - 3) == 0xe1 && Tok(img, i - 5) == SCN_PUSH && Tok(img, i - 4) == 1);
 	// lstr(1) = lstr(0) + "_n" + 2: the buffer, three items (the number without a copy), the store
-	i = FindTok(img, 0x94, 0, 400);
-	CHECK(i < 400 && Tok(img, i - 2) == SCN_LOCAL && Tok(img, i - 1) == 0x100 && Tok(img, i + 1) == SCN_ADD && Tok(img, i + 2) == SCN_STR && Tok(img, i + 4) == 0x48);
+	i = FindTok(img, 0x94, 0, codeLen);
+	CHECK(i < codeLen && Tok(img, i - 2) == SCN_LOCAL && Tok(img, i - 1) == 0x100 && Tok(img, i + 1) == SCN_ADD && Tok(img, i + 2) == SCN_STR && Tok(img, i + 4) == 0x48);
 	CHECK(Tok(img, i + 10) == SCN_ADD && Tok(img, i + 11) == SCN_PUSH && Tok(img, i + 12) == 2 && Tok(img, i + 13) == SCN_PUSH && Tok(img, i + 14) == 1 && Tok(img, i + 15) == 0xe8);
 	// the dispatcher ends the file: str "..not found"; msgbox; quit
 	{
@@ -319,14 +320,15 @@ static void TestCompile(void)
 	if(!img)
 		return;
 	base = 0x1c + Rd32(img + 0x1c);
+	codeLen = Tok(img, 4) / 4; // first string operand marks the end of code
 	// the markers are `line` tokens: the source path (with its backslashes) and the line
 	CHECK(Tok(img, 3) == SCN_LINE && Tok(img, 5) == 1 && strcmp((const char*)img + base + Tok(img, 4), "D:\\Script\\01.bsb") == 0);
 	// msg in the args form: left to right, args 5
-	i = FindTok(img, 0x140, 0, 400);
-	CHECK(i < 400 && Tok(img, i - 2) == SCN_ARGS && Tok(img, i - 1) == 5 && Tok(img, i - 12) == SCN_STR && strcmp((const char*)img + base + Tok(img, i - 11), "Hello") == 0);
+	i = FindTok(img, 0x140, 0, codeLen);
+	CHECK(i < codeLen && Tok(img, i - 2) == SCN_ARGS && Tok(img, i - 1) == 5 && Tok(img, i - 12) == SCN_STR && strcmp((const char*)img + base + Tok(img, i - 11), "Hello") == 0);
 	// the if has a marker; goto = str NAME; set_label; addr 0; jmp
-	i = FindTok(img, SCN_JCC, 0, 400);
-	CHECK(i < 400 && Tok(img, i - 13) == SCN_LINE && Tok(img, i - 11) == 4);
+	i = FindTok(img, SCN_JCC, 0, codeLen);
+	CHECK(i < codeLen && Tok(img, i - 13) == SCN_LINE && Tok(img, i - 11) == 4);
 	CHECK(Tok(img, i + 2) == SCN_LINE && Tok(img, i + 5) == SCN_STR && Tok(img, i + 7) == 0xf6 && Tok(img, i + 8) == SCN_ADDR && Tok(img, i + 9) == 0 && Tok(img, i + 10) == SCN_JMP);
 	BGI_Free(img);
 

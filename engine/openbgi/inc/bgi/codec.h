@@ -160,4 +160,8 @@ uint32_t DcfsDecode(void* dst, const void* src);
 uint32_t DcfsEncode(void* dst, uint32_t* outSize, const void* src,
 	uint32_t frameSize, uint32_t frameCount);
 
+/* Sparse BF_Movie frames using the CBG2 transform; 1 on success. */
+int BGI_CbgMovieFrame(const uint8_t* src, uint32_t size, const uint8_t quant[128],
+	uint32_t type, int w, int h, int bpp, uint8_t* dst, int pitch);
+
 #endif // BGI_CODEC_H_

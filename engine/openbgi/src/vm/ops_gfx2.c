@@ -614,18 +614,18 @@ static int Opcode_Gfx2_MoviePlayArc(Thread_t* t)
 	return 0;
 }
 
-/* 92 F1 (1.494 on): &no, &info, name, arc, streamed →
+/* 92 F1 (1.494 on): &no, &info, arc, name, streamed →
  * The BF_Movie sequence load of "90 F4" (the wait pushes 0 ok / 1 / 2 not
  * a movie when it ends; the thread blocks on it).  `streamed` asks for
  * the form that keeps only the header and index in memory and reads the
  * frames from the archive, whose files are of the BF_Movie types 0x10000
- * / 0x10001 that this build does not decode - the whole file is loaded
- * instead, which serves a type-0 file. */
+ * / 0x10001. This implementation loads the whole file for either mode;
+ * the decoder handles both the simple and the compressed frames. */
 static int Opcode_Gfx2_SeqLoad(Thread_t* t)
 {
 	int streamed = (int)Thread_Pop(t);
-	const char* arc = (const char*)PopPtr(t);
 	const char* name = (const char*)PopPtr(t);
+	const char* arc = (const char*)PopPtr(t);
 	int32_t* info = (int32_t*)PopPtr(t);
 	int32_t* outNo = (int32_t*)PopPtr(t);
 	(void)streamed;

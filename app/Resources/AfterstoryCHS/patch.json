@@ -1,0 +1,38 @@
+{
+  "format": "subahibi-afterstory-chs",
+  "version": 1,
+  "minimumAppVersion": "0.1.6",
+  "baseFontSHA256": "dd33451944dda780cc20518872ab607804ccbc76154baceaf1498557ec2df660",
+  "baseScriptSHA256": "5203cda855e2be5f551fa396484e410fb3d64c207e86bb2d227da41866fe86c4",
+  "files": {
+    "8-1_extra_01-1": "2feabd241a0535965d079496e6228d45d7bf3b0ace24d4628e44f4c3ae5f647c",
+    "8-1_extra_01-2": "23730bde479485102e3bf7d4f842833a3135531bc968c4df0ad44fd9e12178cc",
+    "8_af": "d058d350a6c13b6b8335d96746e741c8a6d601ae1768e72f95c2b47e5ba84dd1",
+    "afterstory-font.ttf": "dde9132e00a9429b66595e04758800d4d9de30f0eb88926df6332f99a515c10d",
+    "extra": "942f450d8165cc1a922cb7646a2aece7f63046ba7dfc3bdf6aba79ec56598b13"
+  },
+  "sourceExecutableSHA256": "ee7ae668a2bf0d97e21aa9d2fa3ab06759ab9ea51501527b55d936c77d4344cd",
+  "sourceFontSHA256": "8b08302bbebbdd658eaee9dfd8ef5faf42201dda642dd73e929f98f4b2c3ac8a",
+  "credits": {
+    "translator": "笑笑竺斋",
+    "title": "素晴日后日谈笑笑汉化补丁",
+    "source": "https://www.bilibili.com/video/BV19m4y1m7Us",
+    "adaptation": "galhack / Subahibi_iOS：Apple 增量封装与兼容字体适配"
+  },
+  "fontCompatibility": {
+    "shadow_code": {
+      "gbk_hex": "9964",
+      "unicode": "U+6A87"
+    },
+    "validation": {
+      "old_outline_changes": 0,
+      "old_horizontal_metric_changes": 0,
+      "old_vertical_metric_changes": 0,
+      "old_layout_metrics_unchanged": true,
+      "epilogue_glyphs_match": true,
+      "input_fonts_unchanged": true,
+      "inspected_scenarios": 231,
+      "inspected_string_references": 310997
+    }
+  }
+}

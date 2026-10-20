@@ -15,8 +15,8 @@ settings:
   base:
     DEVELOPMENT_TEAM: ${SUBAHIBI_TEAM}
     CODE_SIGN_STYLE: Automatic
-    MARKETING_VERSION: "0.1.6"
-    CURRENT_PROJECT_VERSION: "7"
+    MARKETING_VERSION: "0.1.7"
+    CURRENT_PROJECT_VERSION: "8"
     SWIFT_VERSION: "5.0"
     GCC_C_LANGUAGE_STANDARD: gnu99
     CLANG_ENABLE_OBJC_ARC: YES
@@ -31,6 +31,10 @@ targets:
       - path: Resources
         excludes:
           - "Info.plist"
+          - "AfterstoryCHS"
+      - path: Resources/AfterstoryCHS
+        type: folder
+        buildPhase: resources
       - path: ../engine/openbgi/src
         compilerFlags: ["-w"]
         excludes:

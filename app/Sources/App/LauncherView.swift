@@ -14,6 +14,9 @@ struct LauncherView: View {
                 statusSection
                 if model.gameFolder != nil {
                     languageSection
+                    if model.hasAfterstoryPatch && model.language == .chinese {
+                        Toggle("启用后日谈社区汉化", isOn: $model.afterstoryEnabled)
+                    }
                     startButton
                 }
                 #if targetEnvironment(macCatalyst)
@@ -55,7 +58,7 @@ struct LauncherView: View {
                               systemImage: "character.book.closed")
                     }
                     if model.hasAfterstoryPatch {
-                        Label("检测到后日谈增量汉化（启动时校验）", systemImage: "text.badge.checkmark")
+                        Label("已内置后日谈社区汉化", systemImage: "text.badge.checkmark")
                     }
                 } else {
                     Label("尚未找到游戏文件", systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
@@ -151,7 +154,8 @@ struct LauncherView: View {
             #else
             Text("操作：轻点 = 左键 · 双指轻点 = 右键（菜单）· 上下滑动 = 滚轮（回想）· 长按 = 快进")
             #endif
-            Text("本应用不包含任何游戏内容，游戏数据需由玩家自行购买。")
+            Text("游戏本体及本篇汉化需由玩家自行取得并导入；应用内置后日谈社区汉化。")
+            Link("后日谈社区汉化：\(AfterstoryPatch.translator) · 原发布页", destination: AfterstoryPatch.sourceURL)
         }
         .font(.footnote)
         .foregroundStyle(.secondary)

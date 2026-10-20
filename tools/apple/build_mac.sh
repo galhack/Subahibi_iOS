@@ -3,8 +3,9 @@
 #
 #   tools/apple/build_mac.sh
 #
-# The result is build/Subahibi-mac.zip with Subahibi.app inside; no game data
-# goes into it.  The app is ad-hoc signed: on another Mac, open it the first
+# The result is build/Subahibi-mac.zip with Subahibi.app inside. It includes
+# the attributed community afterstory delta; players supply the full game
+# and base patch. The app is ad-hoc signed: on another Mac, open it the first
 # time with right-click > Open (or allow it in System Settings > Privacy &
 # Security), since it is not notarised.
 set -euo pipefail
@@ -16,5 +17,5 @@ xcodebuild -project "$ROOT/app/Subahibi.xcodeproj" -scheme Subahibi -configurati
 	grep -E "error:|BUILD"
 APP="$ROOT/build/dd-mac/Build/Products/Release-maccatalyst/Subahibi.app"
 rm -f "$ROOT/build/Subahibi-mac.zip"
-ditto -c -k --keepParent "$APP" "$ROOT/build/Subahibi-mac.zip"
+ditto --norsrc -c -k --keepParent "$APP" "$ROOT/build/Subahibi-mac.zip"
 echo "wrote build/Subahibi-mac.zip ($APP)"

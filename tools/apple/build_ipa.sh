@@ -4,7 +4,7 @@
 #
 #   tools/apple/build_ipa.sh [ios|tvos|visionos]     (default ios)
 #
-# The result is build/Subahibi-<platform>.ipa.  No game data goes into it.
+# Includes only the attributed community afterstory delta; players supply the full game and base patch.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PLATFORM="${1:-ios}"

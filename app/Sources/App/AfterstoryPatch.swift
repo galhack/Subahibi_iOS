@@ -1,14 +1,18 @@
 import Foundation
 import CryptoKit
 
-/// An optional delta next to the purchased game's archives. Only these four
-/// afterstory resources may override the existing Chinese translation.
+/// The community afterstory delta, bundled with the app or supplied next to
+/// the purchased game's archives. Only four afterstory resources may override
+/// the existing Chinese translation.
 struct AfterstoryPatch {
     static let directoryName = "AfterstoryCHS"
     static let resourceNames: Set<String> = ["extra", "8_af", "8-1_extra_01-1", "8-1_extra_01-2"]
     static let fontName = "afterstory-font.ttf"
     static let payloadNames = resourceNames.union([fontName])
     static let transferNames = payloadNames.union(["patch.json", "Readme.txt"])
+    static let translator = "笑笑竺斋"
+    static let sourceURL = URL(string: "https://www.bilibili.com/video/BV19m4y1m7Us")!
+    static var bundledDirectory: URL? { Bundle.main.url(forResource: directoryName, withExtension: nil) }
 
     let directory: URL
     var font: URL { directory.appendingPathComponent(Self.fontName) }
@@ -33,10 +37,19 @@ struct AfterstoryPatch {
 
     /// Absence leaves the base game alone; an incomplete or incompatible
     /// patch is reported before the engine starts, never partially enabled.
-    static func load(gameFolder: URL, baseOverlay: URL) throws -> AfterstoryPatch? {
+    static func load(gameFolder: URL, baseOverlay: URL, bundledDirectory: URL? = nil,
+                     enabled: Bool = true) throws -> AfterstoryPatch? {
+        guard enabled else { return nil }
         let fm = FileManager.default
-        let folder = gameFolder.appendingPathComponent(directoryName, isDirectory: true)
-        guard fm.fileExists(atPath: folder.path) else { return nil }
+        let external = gameFolder.appendingPathComponent(directoryName, isDirectory: true)
+        let folder: URL
+        if fm.fileExists(atPath: external.path) {
+            folder = external
+        } else if let bundledDirectory, fm.fileExists(atPath: bundledDirectory.path) {
+            folder = bundledDirectory
+        } else {
+            return nil
+        }
         do {
             let data = try Data(contentsOf: folder.appendingPathComponent("patch.json"))
             let manifest = try JSONDecoder().decode(Manifest.self, from: data)

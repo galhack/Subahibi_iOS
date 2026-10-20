@@ -8,6 +8,16 @@ BGI.hvl
 font.ttf
 AfterstoryCHS/
 *AfterstoryCHS*.zip
+# Approved community afterstory delta; keep every other game asset ignored.
+!app/Resources/AfterstoryCHS/
+app/Resources/AfterstoryCHS/*
+!app/Resources/AfterstoryCHS/extra
+!app/Resources/AfterstoryCHS/8_af
+!app/Resources/AfterstoryCHS/8-1_extra_01-1
+!app/Resources/AfterstoryCHS/8-1_extra_01-2
+!app/Resources/AfterstoryCHS/afterstory-font.ttf
+!app/Resources/AfterstoryCHS/patch.json
+!app/Resources/AfterstoryCHS/Readme.txt
 UserData/
 
 # Private notes and credentials

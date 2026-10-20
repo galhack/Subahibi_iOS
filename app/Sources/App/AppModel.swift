@@ -20,6 +20,7 @@ final class AppModel: ObservableObject {
     @Published var progress: Double = 0
     @Published var errorMessage: String?
     @AppStorage("language") var languageRaw: String = GameLanguage.chinese.rawValue
+    @AppStorage("afterstoryEnabled") var afterstoryEnabled = true
 
     let transfer = TransferServer()
 
@@ -63,7 +64,7 @@ final class AppModel: ObservableObject {
         gameFolder = GamePaths.findGameFolder()
         hasAfterstoryPatch = gameFolder.map {
             FileManager.default.fileExists(atPath: $0.appendingPathComponent(AfterstoryPatch.directoryName).path)
-        } ?? false
+        } == true || AfterstoryPatch.bundledDirectory != nil
         if let folder = gameFolder {
             hasChinesePatch = GamePaths.fileExists(named: "BGI-CHS.exe", in: folder) || overlayIsCurrent(for: folder)
             overlayReady = overlayIsCurrent(for: folder)
@@ -107,7 +108,10 @@ final class AppModel: ObservableObject {
         let overlay = language == .chinese ? GamePaths.chineseOverlay : nil
         let afterstory: AfterstoryPatch?
         do {
-            afterstory = try overlay.flatMap { try AfterstoryPatch.load(gameFolder: folder, baseOverlay: $0) }
+            afterstory = try overlay.flatMap {
+                try AfterstoryPatch.load(gameFolder: folder, baseOverlay: $0,
+                                        bundledDirectory: AfterstoryPatch.bundledDirectory, enabled: afterstoryEnabled)
+            }
         } catch {
             errorMessage = error.localizedDescription
             phase = .launcher

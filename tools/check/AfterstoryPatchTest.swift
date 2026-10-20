@@ -40,6 +40,13 @@ enum AfterstoryPatchTest {
         try writeManifest()
         let patch = try AfterstoryPatch.load(gameFolder: game, baseOverlay: overlay)
         precondition(patch?.directory.path == folder.path)
+        let bundled = root.appendingPathComponent("BundledAfterstory")
+        try fm.moveItem(at: folder, to: bundled)
+        let fallback = try AfterstoryPatch.load(gameFolder: game, baseOverlay: overlay, bundledDirectory: bundled)
+        precondition(fallback?.directory.path == bundled.path)
+        try fm.copyItem(at: bundled, to: folder)
+        let external = try AfterstoryPatch.load(gameFolder: game, baseOverlay: overlay, bundledDirectory: bundled)
+        precondition(external?.directory.path == folder.path)
         try Data("corrupt".utf8).write(to: folder.appendingPathComponent("extra"))
         rejects("corrupt scene")
         try Data("extra".utf8).write(to: folder.appendingPathComponent("extra"))
@@ -50,6 +57,13 @@ enum AfterstoryPatchTest {
         manifest["files"] = hashes
         try writeManifest()
         rejects("main-story override")
+        do {
+            _ = try AfterstoryPatch.load(gameFolder: game, baseOverlay: overlay, bundledDirectory: bundled)
+            fatalError("a corrupt external patch silently fell back to the bundle")
+        } catch {}
+        let disabled = try AfterstoryPatch.load(gameFolder: game, baseOverlay: overlay,
+                                               bundledDirectory: bundled, enabled: false)
+        precondition(disabled == nil)
         precondition(AfterstoryPatch.isTransferPath("AfterstoryCHS/extra"))
         precondition(!AfterstoryPatch.isTransferPath("AfterstoryCHS/../font.ttf"))
         precondition(!AfterstoryPatch.isTransferPath("AfterstoryCHS/Main"))

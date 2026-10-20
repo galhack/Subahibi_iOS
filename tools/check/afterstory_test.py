@@ -1,5 +1,7 @@
 """Source-only regression checks; no game data or font fixtures required."""
 import importlib.util
+import hashlib
+import json
 from pathlib import Path
 import struct
 import sys
@@ -17,6 +19,17 @@ spec.loader.exec_module(push)
 
 
 class AfterstoryTest(unittest.TestCase):
+    def test_bundled_payload_hashes_and_original_translator_credit(self):
+        folder = ROOT / "app/Resources/AfterstoryCHS"
+        manifest = json.loads((folder / "patch.json").read_text())
+        self.assertEqual(set(manifest["files"]), RESOURCES | {"afterstory-font.ttf"})
+        self.assertEqual({p.name for p in folder.iterdir()}, set(manifest["files"]) | {"patch.json", "Readme.txt"})
+        for name, digest in manifest["files"].items():
+            self.assertEqual(hashlib.sha256((folder / name).read_bytes()).hexdigest(), digest)
+        self.assertEqual(manifest["credits"]["translator"], "笑笑竺斋")
+        self.assertEqual(manifest["credits"]["source"], "https://www.bilibili.com/video/BV19m4y1m7Us")
+        self.assertIn("笑笑竺斋", (folder / "Readme.txt").read_text())
+
     def test_parser_returns_string_offset_without_matching_code_bytes(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "extra"

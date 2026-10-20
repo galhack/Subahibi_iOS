@@ -403,6 +403,20 @@ static void TestGatherAdd(void)
 	Bmp_Free(&dst);
 }
 
+// Opaque blur must preserve all four unsigned channels, including bit 31.
+static void TestOpaqueGradient(void)
+{
+	Bmp_t src, dst;
+	Bmp_Alloc(&src, 2, 1, PM_ARGB32);
+	Bmp_Alloc(&dst, 2, 1, PM_ARGB32);
+	memset(src.pixels, 0xff, (size_t)src.pitch);
+	CHECK(Blit_Gradient(&dst, &src, 1, 1) == 0);
+	CHECK(((uint32_t*)dst.pixels)[0] == 0xffffffffu);
+	CHECK(((uint32_t*)dst.pixels)[1] == 0xffffffffu);
+	Bmp_Free(&src);
+	Bmp_Free(&dst);
+}
+
 // run every group; exit status 1 when any check failed
 int main(void)
 {
@@ -413,6 +427,7 @@ int main(void)
 	TestEffects(PM_RGB16);
 	TestClipping();
 	TestTransforms();
+	TestOpaqueGradient();
 	if(gFails)
 	{
 		printf("%d failure(s)\n", gFails);

@@ -262,10 +262,11 @@ static void BoxBlur(Bmp_t* dst, const Bmp_t* src, int level, int clamp)
 		}
 		for(x = 0; x < w; x++)
 		{
-			int out = 0, c, idx;
+			uint32_t out = 0;
+			int c, idx;
 			for(c = 0; c < 4; c++)
-				out |= Sat8((((int16_t)sum[c] * q) >> 16) << shift) << (c * 8);
-			tmp[x] = (uint32_t)out;
+				out |= (uint32_t)Sat8((((int16_t)sum[c] * q) >> 16) << shift) << (c * 8);
+			tmp[x] = out;
 			// slide: drop x - half, take x + half + 1
 			idx = x - half;
 			if(clamp ? 1 : idx >= 0)

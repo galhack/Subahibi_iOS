@@ -65,7 +65,7 @@ int Arc_Exists(const char* arcPath, const char* name)
 	return ArcMgr_Exists(gArcMgr, arcPath, name);
 }
 
-/* Load a whole file into buf (which must be large enough: GetFileSize_
+/* Load a whole file into buf (which must be large enough: GetFileLoadCapacity
  * says how large), prompting for the disc until it is found, and decode
  * DSC / CompressedBG data in place.  The bytes in buf.  Throws when the
  * file is missing and there is no disc to ask for, or the user aborts. */
@@ -133,6 +133,36 @@ uint32_t LoadFile(void* buf, const char* arc, const char* name)
 		BGI_Free(out); // a CompressedBG that does not decode is left as stored
 	}
 	return n;
+}
+
+/* HD pictures can decode well beyond the original 32 MiB scratch buffer.
+ * Probe the stored length and header without copying the asset first. */
+uint32_t GetFileLoadCapacity(const char* arc, const char* name)
+{
+	union {
+		CbgHeader_t cbg;
+		uint8_t bytes[sizeof(CbgHeader_t)];
+	} header = {0};
+	uint32_t stored = GetFileSizeFast(arc, name);
+	uint32_t decoded = 0, count;
+	if(!stored)
+		return 0;
+	count = stored < sizeof(header) ? stored : (uint32_t)sizeof(header);
+	if(LoadFileRange(&header, arc, name, 0, count) != 0)
+		ThrowScriptError("Cannot read resource header");
+	if(stored >= sizeof(CbgHeader_t) && BGI_IsCbg(&header))
+	{
+		uint64_t pixels = (uint64_t)header.cbg.width * header.cbg.height *
+		                 ((header.cbg.bpp & 0xffffu) >> 3);
+		if(pixels > UINT32_MAX - 16u)
+			ThrowScriptError("Decoded image exceeds supported size");
+		decoded = (uint32_t)pixels + 16u;
+	}
+	else if(stored >= sizeof(DscHeader_t) && BGI_IsDsc(&header))
+		decoded = BGI_DscOutSize(&header);
+	if(decoded > stored)
+		stored = decoded;
+	return stored < 16 ? 16 : stored;
 }
 
 /* "80 31" up to 1.69 build 444, "81 30" of 1.529 on: [off, off + size) of
@@ -335,7 +365,7 @@ uint32_t GetFileSizeFast(const char* arc, const char* name)
 		return n;
 	PathJoin(path, gBaseDir, arc);
 	n = Arc_Read(NULL, path, name);
-	if(n == ARC_ERR_OPEN && DriveReady(gAltDir))
+	if((n == ARC_ERR_OPEN || n == ARC_ERR_NOT_FOUND) && DriveReady(gAltDir))
 	{
 		PathJoin(path, gAltDir, arc);
 		n = Arc_Read(NULL, path, name);

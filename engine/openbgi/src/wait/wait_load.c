@@ -6,7 +6,7 @@
  *
  * Interface: waitobj.h (the constructors).
  *
- *   WaitLoader     base: a file read by the loader thread into a 32 MB buffer
+ *   WaitLoader     base: a file read into a buffer sized from its header
  *   WaitBmpLoad    "90 10": the file becomes a bitmap slot; pushes nothing
  *   WaitSeLoad     "A0 20" / "A0 21": the file becomes a sound effect slot;
  *                  pushes nothing
@@ -34,7 +34,7 @@
 typedef struct WaitLoader // 0x238 bytes
 {
 	Wait_t w;         // (WaitCounted)
-	uint8_t* buf;     // 32 MB file buffer
+	uint8_t* buf;     // sized for both stored and decoded bytes
 	char arc[0x104];  // lower-cased archive name ("" for none)
 	char name[0x104]; // lower-cased file name
 	uint32_t status;  // loader status: 0 pending, -1 failed, else the size in bytes
@@ -65,7 +65,7 @@ typedef struct LoaderVtbl
 } LoaderVtbl_t;
 
 // the archive argument of the file functions: "0" means a loose file
-#define ARC_ARG(l) ((l)->arc[0] != '0' ? (l)->arc : NULL)
+#define ARC_ARG(l) ((l)->arc[0] && (l)->arc[0] != '0' ? (l)->arc : NULL)
 
 /* the shared start: copy the names lower-cased, allocate the buffer and
  * either satisfy the read from the file cache (useCache, and the cache
@@ -90,12 +90,23 @@ static void WaitLoader_Ctor(WaitLoader_t* w, Thread_t* t, const char* arc, const
 	strcpy(w->name, name);
 	SjisStrLwr(w->name);
 	w->useCache = useCache && gFileCache != NULL;
-	w->buf = (uint8_t*)BGI_Alloc(0x2000000);
-	if(w->useCache)
+	w->buf = NULL;
+	w->cacheHit = 0;
+	if(w->useCache && FileCache_Lookup(gFileCache, NULL, &w->status, ARC_ARG(w), w->name))
 	{
+		w->buf = (uint8_t*)BGI_Alloc(w->status < 16 ? 16 : w->status);
 		w->cacheHit = FileCache_Lookup(gFileCache, w->buf, &w->status, ARC_ARG(w), w->name) != 0;
 		if(w->cacheHit)
 			return;
+	}
+	{
+		uint32_t capacity = GetFileLoadCapacity(ARC_ARG(w), w->name);
+		if(!capacity)
+		{
+			w->status = 0xffffffffu;
+			return;
+		}
+		w->buf = (uint8_t*)BGI_Alloc(capacity);
 	}
 	Loader_QueueFile(&w->status, w->buf, ARC_ARG(w), w->name);
 }

@@ -158,6 +158,7 @@ DEP := $(OBJ:.o=.d)
 LIB_OBJ := $(filter-out obj/$(PLATFORM)/sys/main.o,$(OBJ)) # the engine without its entry point
 ifeq ($(PLATFORM),apple)
   OBJ := $(LIB_OBJ) # the host (tools/apple/hosttest.c, or the application) has the entry point
+  LIB_OBJ := $(filter-out obj/apple/tools/apple/hosttest.o,$(LIB_OBJ))
 endif
 
 TARGET ?= bin/bgi$(EXE)

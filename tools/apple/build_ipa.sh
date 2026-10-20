@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 # Build an unsigned .ipa for Sideloadly / AltStore, which sign it with your
 # own Apple ID when they install it.
 #
 #   tools/apple/build_ipa.sh [ios|tvos|visionos]     (default ios)
 #
 # The result is build/Subahibi-<platform>.ipa.  No game data goes into it.
-set -e
+set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PLATFORM="${1:-ios}"
 case "$PLATFORM" in

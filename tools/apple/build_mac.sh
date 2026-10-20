@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Build the Mac application (Mac Catalyst), signed to run locally, and zip it.
 #
 #   tools/apple/build_mac.sh
@@ -7,7 +7,7 @@
 # goes into it.  The app is ad-hoc signed: on another Mac, open it the first
 # time with right-click > Open (or allow it in System Settings > Privacy &
 # Security), since it is not notarised.
-set -e
+set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
 "$ROOT/tools/apple/gen_project.sh" > /dev/null

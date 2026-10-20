@@ -127,7 +127,7 @@ typedef struct FileCache FileCache_t;
 FileCache_t* FileCache_New(uint32_t capacity); // capacity in bytes
 void FileCache_Delete(FileCache_t* c);
 int FileCache_Add(FileCache_t* c, const char* arc, const char* name, const void* data, uint32_t size); // 1 stored, 0 too large or empty
-int FileCache_Lookup(FileCache_t* c, void* dst, uint32_t* size, const char* arc, const char* name);    // 1 on a hit (data copied to dst)
+int FileCache_Lookup(FileCache_t* c, void* dst, uint32_t* size, const char* arc, const char* name);    // 1 on a hit; dst NULL queries size only
 
 /* the loader's optional file cache (created by "90 03"): the
  * bitmap loader consults it before reading an archive */
@@ -181,6 +181,9 @@ void Loader_Stop(void);
  * CompressedBG.  Returns the size in buf.  Prompts for the disc while the
  * file is missing; throws when the user gives up (or without a disc). */
 uint32_t LoadFile(void* buf, const char* arc, const char* name);
+/* Capacity needed for both stored and decoded bytes, at least 16 bytes.
+ * Reads only the compression header; returns 0 when the file is missing. */
+uint32_t GetFileLoadCapacity(const char* arc, const char* name);
 /* "80 31" up to 1.69 build 444, "81 30" of 1.529 on: part of a file as
  * stored; 0 ok, 1 not found, 2 the range reaches past the end, 3 the size
  * exceeds the file, -1 short read */

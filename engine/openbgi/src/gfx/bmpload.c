@@ -26,8 +26,6 @@
 #include "bgi/msg.h"
 #include "bgi/os.h"
 
-#define LOAD_BUFFER 0x2000000 // 32 MB: the engine's load buffer
-
 /* "90 10": load an image file into a slot.  The loader's cache is consulted
  * first; a Windows BMP is decoded directly, anything else must be a raw
  * image (as left by LoadFile after decompression).  0 ok, else the
@@ -38,12 +36,21 @@
  * this code. */
 int BmpOp_LoadFile(int slot, const char* arc, const char* name)
 {
-	uint8_t* buf = (uint8_t*)BGI_Alloc(LOAD_BUFFER);
+	uint8_t* buf;
 	uint32_t size = 0;
 	int r;
 
-	if(!Loader_CacheLookup(buf, &size, arc, name))
+	if(Loader_CacheLookup(NULL, &size, arc, name))
 	{
+		buf = (uint8_t*)BGI_Alloc(size < 16 ? 16 : size);
+		Loader_CacheLookup(buf, &size, arc, name);
+	}
+	else
+	{
+		uint32_t capacity = GetFileLoadCapacity(arc, name);
+		if(!capacity)
+			return (int)0x80000001;
+		buf = (uint8_t*)BGI_Alloc(capacity);
 		size = LoadFile(buf, arc, name);
 		Loader_CacheAdd(arc, name, buf, size);
 	}
@@ -70,9 +77,13 @@ int BmpOp_LoadFile(int slot, const char* arc, const char* name)
 // "92 1F": a Windows BMP file of the file system (not an archive) into a slot; the decoder's result, -1 when the file cannot be read
 int BmpOp_LoadLocal(int slot, const char* path)
 {
-	uint8_t* buf = (uint8_t*)BGI_Alloc(LOAD_BUFFER);
+	uint32_t size = ReadWholeFile(NULL, NULL, path);
+	uint8_t* buf;
 	int r = -1;
 
+	if(!size)
+		return r;
+	buf = (uint8_t*)BGI_Alloc(size < 54 ? 54 : size);
 	if(ReadWholeFile(buf, NULL, path) > 0)
 		r = BmpOp_DecodeBmp(slot, buf);
 	BGI_Free(buf);

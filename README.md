@@ -1,5 +1,23 @@
 # 美好的每一天 ～不连续存在～ · Apple 平台移植
 
+项目仓库：[galhack/Subarashiki_iOS](https://github.com/galhack/Subarashiki_iOS)。
+安装包：[Releases](https://github.com/galhack/Subarashiki_iOS/releases)。
+
+### 0.1.1 稳定性更新
+
+修复推进剧情时加载超大图片导致的崩溃：旧版使用固定 32 MiB 缓冲区，
+部分 HD 图片解压后达到约 44.5–58.6 MiB，造成越界写入。
+新版按文件的压缩前后大小分配缓冲区，同步加载、等待加载和缓存命中路径均已修复。
+更新时使用同一应用标识覆盖安装，保留游戏资源和存档；请先备份存档，不要先删除旧版。
+
+Release 提供 iOS/iPadOS、tvOS、visionOS 的未签名 IPA，以及本地签名的 Mac Catalyst 应用。
+IPA 需要使用自己的签名安装；游戏本体和汉化内容必须自行购买、取得并导入。
+
+本次验证（2026-10-20）：iPhone 16 Pro Max 覆盖安装成功，用户确认存档 2
+后不久的地铁动画已能正常通过；12 个引擎测试程序全部通过，全部 10 张超大图片通过
+ASan / UBSan 检查。iOS/iPadOS、tvOS、visionOS、Mac Catalyst 均构建成功；
+本次未重新在 iPad、Apple TV 和 Vision Pro 实机上验证，也未进行全流程通关测试。
+
 把 ケロQ《素晴らしき日々 ～不連続存在～》（BGI/Ethornell 引擎，HD 版，产品名 `SubarashikihibiHD`）
 原生移植到 **iPhone、iPad、Mac、Apple TV、Apple Vision Pro**。日文原版与【冥月·凌雪汉化组】中文补丁都可以游玩。
 
@@ -43,8 +61,8 @@
 ### 1. 生成 Xcode 工程
 
 ```sh
-git clone <本仓库>
-cd subarashiki
+git clone https://github.com/galhack/Subarashiki_iOS.git
+cd Subarashiki_iOS
 SUBAHIBI_TEAM=<你的 Team ID> tools/apple/gen_project.sh
 open app/Subahibi.xcodeproj
 ```
@@ -191,6 +209,23 @@ bin/openbgi-hosttest /path/to/game --overlay=<解包后的汉化目录> --font=/
 
 真机/模拟器上可用环境变量做无人值守测试：`SUBAHIBI_AUTOSTART=ja|zh` 跳过启动页，
 `SUBAHIBI_SCRIPT="wait 6 click 640 480 shot title"` 注入输入并把截图写到 `Documents/Debug/`。
+
+引擎测试与大图加载回归测试：
+
+```sh
+cd engine/openbgi
+make -j8 PLATFORM=apple CC=clang VORBIS=stb test
+# 可选：用自己购买的游戏验证全部 10 张超过 32 MiB 的图片
+BGI_GAME_DIR=/absolute/path/to/game bin/test_imageload
+```
+
+`tests/imageload.c` 默认生成临时图片，覆盖同步加载、等待加载和缓存命中，
+不含游戏素材。内存检查可用 `make -B` 重建该测试，并设置
+`OPT="-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer"`；
+完成后用默认编译选项重新构建，避免混用带检查器的目标文件。
+
+本仓库忽略游戏目录、封包、凭证、签名文件、构建结果、`agents.md` / `AGENTS.md`
+及 `IMPLEMENTATION_PLAN.md`。公开源码不包含本地调试报告和存档。
 
 ---
 

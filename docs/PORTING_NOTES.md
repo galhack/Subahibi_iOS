@@ -55,6 +55,28 @@ device.
 
 ## Testing
 
+### 0.1.1 image-load crash
+
+Two iPhone crash reports on 2026-10-20 had the same stack:
+`memmove → LoadFile → BmpOp_LoadFile → Opcode_Gfx0_BmpLoad`.
+The decoded copy was 46,687,504 bytes, matching `sp0011a`
+(11,766 × 992 × 4 + 16); the destination was only 32 MiB.
+Ten images in the HD archives exceed that old allocation.
+
+`GetFileLoadCapacity` probes the stored length and compression header.
+Bitmap and wait loaders allocate the larger of stored and decoded sizes;
+cache lookup accepts a null destination to query its size before copying.
+The synthetic `test_imageload` covers uncached and cached synchronous/wait
+loads. With `BGI_GAME_DIR`, it also loads all ten large compressed images.
+Those ten images passed AddressSanitizer and UndefinedBehaviorSanitizer.
+The test fixtures and crash reports remain local; no game data is published.
+The owner confirmed on iPhone 16 Pro Max that the subway animation shortly
+after save slot 2 now advances without the crash. All 12 engine test
+executables passed, and iOS, tvOS, visionOS and Mac Catalyst packages built.
+The other physical devices were unavailable for this revision's testing.
+
+### Other checks
+
 - `engine/openbgi`: `make PLATFORM=apple CC=clang VORBIS=stb bin/openbgi-hosttest`
   runs the real back end on macOS with a scripted pointer and writes
   pictures; `--movie=ARC:NAME` exercises the movie player alone.

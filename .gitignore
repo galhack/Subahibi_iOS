@@ -9,6 +9,14 @@ font.ttf
 UserData/
 
 # Private notes and credentials
+agents.md
+AGENTS.md
+IMPLEMENTATION_PLAN.md
+*.key
+*.p8
+*.pfx
+credentials*
+secrets*
 Claude.md
 CLAUDE.md
 *.env

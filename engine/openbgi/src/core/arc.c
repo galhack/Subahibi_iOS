@@ -668,7 +668,8 @@ int FileCache_Lookup(FileCache_t* c, void* dst, uint32_t* size, const char* arc,
 	}
 	if(!e)
 		return 0;
-	memcpy(dst, e->data, e->size);
+	if(dst) // NULL queries the capacity before allocating a destination
+		memcpy(dst, e->data, e->size);
 	*size = e->size;
 	*link = e->next;
 	e->next = c->head;

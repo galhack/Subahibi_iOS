@@ -104,6 +104,24 @@ MakerLogo lookup is hidden and that direct asset access remains available.
 The original Kimika ending records completion flag 214; the main ending sets
 chapter flag 232. These conditions are unchanged. Chapter selection uses
 transparent normal images and visible hover images; private fixture testing
-confirmed highlighting and entry into a chapter. Lost flags from an already
-overwritten database cannot be reconstructed from the chapter-local manual
-saves. No synthetic unlock flags are installed on user devices.
+confirmed highlighting and entry into a chapter. Chapter-local manual saves do not contain global menu flags. Version 0.1.4
+recovers prerequisite menu access from surviving completion/menu flags, as
+described below.
+
+### 0.1.4 restore prerequisite chapter access and visible choices
+
+Apple builds enable `--repair-subahibi-progress`. After a successful database
+load, the 1.647 compatibility path restores missing prerequisite menu flags
+from surviving completion flags 211-214 or a later menu flag 230-238.
+Kimika completion 214 restores 230 and 231, while 232 still requires main
+ending 213 or a later reached entry. Fresh progress gets no new entries.
+Normal game saves persist these restored bits; manual save slots are untouched.
+The database regression covers missing prerequisites, a mixed surviving menu
+bit/main ending, no completion, later access, persistence and unrelated bits.
+
+`--subahibi-chapter-menu` makes available chapter images visible without
+hover. It applies only to the nine-entry descriptor in `scrslct._bp`, using
+its focus image as its normal image. Enable flags, masks and decisions remain
+the script's. `test_chaptermenu` covers the available/locked distinction,
+unchanged source tables and other modules. Debug scripts accept `touch 1`
+to test with the pointer suppression state of a finger tap.

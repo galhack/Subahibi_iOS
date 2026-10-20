@@ -275,6 +275,8 @@ int main(int argc, char** argv)
 				}
 				else if(!strcmp(word, "move") && sscanf(script, "%d %d%n", &x, &y, &n) == 2)
 					AppleHost_PointerMove(x, y), script += n;
+				else if(!strcmp(word, "touch") && sscanf(script, "%d%n", &x, &n) == 1)
+					AppleHost_SetTouchInput(x), script += n;
 				else if(!strcmp(word, "key") && sscanf(script, "%i%n", &x, &n) == 1)
 				{
 					AppleHost_Key(x, 1);

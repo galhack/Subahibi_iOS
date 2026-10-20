@@ -10,7 +10,7 @@ import UniformTypeIdentifiers
 ///   SUBAHIBI_SCRIPT="..."      input once the engine runs, the words of
 ///                              tools/apple/hosttest.c: wait S, move X Y,
 ///                              click X Y, rclick X Y, key VK, keydown VK,
-///                              keyup VK, wheel D, shot NAME
+///                              keyup VK, wheel D, touch 0|1, shot NAME
 ///
 /// "shot NAME" writes the picture to Documents/Debug/NAME.png (Caches on tvOS).
 /// Nothing here runs in a normal launch.
@@ -57,6 +57,8 @@ enum DebugScript {
             case "move":
                 let x = int(), y = int()
                 AppleHost_PointerMove(x, y)
+            case "touch":
+                AppleHost_SetTouchInput(int())
             case "click", "rclick":
                 let x = int(), y = int()
                 let b: Int32 = word == "rclick" ? 1 : 0

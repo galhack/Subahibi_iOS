@@ -30,6 +30,7 @@
 #include "bgi/msg.h"
 #include "bgi/os.h"
 #include "bgi/version.h"
+#include "bgi/engine.h"
 
 #define GDB_FILE      "BGI.gdb"
 #define GDB_GLOBALS   0x008                        // offset of the global-memory prefix (after the window position)
@@ -149,6 +150,39 @@ int GlobalDB_Save(void)
 	return written == encSize;
 }
 
+static int SubahibiFlag(int flag)
+{
+	return (gGlobalMem[160 + flag / 8] & (1 << (flag % 8))) != 0;
+}
+
+/* Early Apple releases could lose the menu flags on restart. A surviving
+ * ending or later menu entry proves its prerequisite chapters were reached.
+ * Restore only that access: a Kimika ending (214) must not grant 232, which
+ * requires the main ending (213). Other completion/read flags stay intact. */
+static void RepairSubahibiProgress(void)
+{
+	int last = 229, flag, repaired = 0;
+	if(!gRepairSubahibiProgress || gEngine->gen != GEN_1_647)
+		return;
+	if(SubahibiFlag(211))
+		last = 230;
+	if(SubahibiFlag(212) || SubahibiFlag(214))
+		last = 231;
+	if(SubahibiFlag(213))
+		last = 232;
+	for(flag = 230; flag <= 238; flag++)
+		if(flag > last && SubahibiFlag(flag))
+			last = flag;
+	for(flag = 230; flag <= last; flag++)
+		if(!SubahibiFlag(flag))
+		{
+			gGlobalMem[160 + flag / 8] |= 1 << (flag % 8);
+			repaired++;
+		}
+	if(repaired)
+		fprintf(stderr, "bgi: restored %d prerequisite chapter entries through flag %d\n", repaired, last);
+}
+
 /* Read the file and restore the global memory prefix, the system area,
  * the names and the flag groups from it.  The decoded size must cover the
  * flag records and match the flag bytes they describe, else the file
@@ -189,6 +223,8 @@ uint32_t GlobalDB_Load(void)
 			result = 0;
 	}
 	BGI_Free(db);
+	if(result == 0)
+		RepairSubahibiProgress();
 	return result;
 }
 

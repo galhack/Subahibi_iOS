@@ -25,6 +25,7 @@
 #include "bgi/sys.h"
 #include "bgi/vm.h"
 #include "bgi/version.h" // the `flags` of SpriteButton_t depend on the engine generation
+#include "bgi/engine.h"
 
 // the window's sort key: the layer key the panel uses on the input layer stacks
 #define WIN_KEY(p) ((p)->win->obj.vt->sortKey(&(p)->win->obj))
@@ -124,6 +125,19 @@ void SpritePanel_FreeDesc(SpriteDesc_t* d)
 	BGI_Free(d);
 }
 
+// Restrict the presentation change to the chapter selector's own module and table.
+static int ShowSubahibiChapters(const SpriteDesc_t* d, const Thread_t* t)
+{
+	const ModuleNode_t* m;
+	if(!gSubahibiChapterMenu || gEngine->gen != GEN_1_647 ||
+		d->groupCount != 1 || d->groups[0].count != 9)
+		return 0;
+	for(m = t->modules; m; m = m->next)
+		if(t->opIP >= m->base && t->opIP - m->base < m->size)
+			return strcmp(m->name, "scrslct._bp") == 0;
+	return 0;
+}
+
 /* Panel_CopyDesc for the sprite records: a private copy of the descriptor,
  * its groups and their buttons with the tagged pointers resolved through
  * thread `t`; the copy is the host-side type of panel.h.  Returns 0 and
@@ -188,6 +202,19 @@ int SpritePanel_CopyDesc(SpriteDesc_t** out, const SpriteDescScript_t* d, Thread
 		SpritePanel_FreeDesc(c);
 		*out = NULL;
 		return status;
+	}
+	/* This selector's normal images are deliberately transparent. Show the
+	 * unlocked chapter images at rest so touch/remote users can find them;
+	 * retain the original enable flags, masks and decision handling. */
+	if(ShowSubahibiChapters(c, t))
+	{
+		int i;
+		for(i = 0; i < c->groups[0].count; i++)
+		{
+			SpriteButton_t* b = &c->groups[0].buttons[i];
+			if(b->enabled && b->shown && b->bmpFocus != -1)
+				b->bmpNormal = b->bmpFocus;
+		}
 	}
 	*out = c;
 	return 0;

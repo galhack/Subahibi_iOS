@@ -30,7 +30,7 @@ enum EngineBridge {
             saves.path.withCString { save in
                 withOptionalCString(overlay?.path) { over in
                     withOptionalCString(font?.path) { fontPath in
-                        "--engine=1.647 --skip-maker-logo".withCString { args in
+                        "--engine=1.647 --skip-maker-logo --repair-subahibi-progress --subahibi-chapter-menu".withCString { args in
                             var cfg = AppleHostConfig_t(gameDir: game, overlayDir: over, saveDir: save,
                                                         fontFile: fontPath, chinese: language == .chinese ? 1 : 0,
                                                         engineArgs: args)

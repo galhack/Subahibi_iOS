@@ -58,6 +58,10 @@ ASan / UBSan 检查。iOS/iPadOS、tvOS、visionOS、Mac Catalyst 均构建成�
 
 ## 构建与安装
 
+### 说明
+1. 如果要安装iPhone或iPad版本，直接在Release中下载安装包 Subahibi-ios.ipa，然后使用[Sideloadly](https://sideloadly.io/)传入设备即可
+2. 如果要安装Mac版本，直接在Release中下载安装包 subahibi-mac.zip，解压缩即可使用，首次打开时需要设置一下游戏本体目录
+
 ### 1. 生成 Xcode 工程
 
 ```sh
